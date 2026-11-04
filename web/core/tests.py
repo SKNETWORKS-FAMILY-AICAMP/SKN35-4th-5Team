@@ -31,7 +31,10 @@ GENERATE_RESPONSE = {
     "request_id": "g1",
     "status": "생성완료",
     "product_id": "web_1",
-    "candidates": [{"text": "촉촉함이 오래 머무는 크림", "tier": "safe", "status": "검토통과"}],
+    "candidates": [
+        {"text": "촉촉함이 오래 머무는 크림", "tier": "safe", "status": "검토통과"},
+        {"text": "주름이 사라지는 크림", "tier": "strong", "status": "제외"},
+    ],
     "timing": {"retrieval_ms": 1, "llm_ms": 1, "total_ms": 2},
 }
 
@@ -95,6 +98,20 @@ class ReviewTests(BaseTestCase):
         self.assertContains(detail, "화장품법 시행규칙")
         self.assertContains(detail, "피부 결을 매끄럽게 가꿔줍니다")
 
+    def test_review_without_verified_suggestion_shows_notice(self):
+        response = {
+            **REVIEW_RESPONSE,
+            "result": {**REVIEW_RESPONSE["result"], "suggestion": None},
+            "candidates": [],
+            "candidate_details": [{"text": "탈락 문구", "verified": False, "verify_note": "보유 실증에 없는 수치(70%)"}],
+        }
+        with mock.patch("core.ai_client.review", return_value=response):
+            self.client.post(reverse("reviews:create"), {"product": self.product.pk, "copy_text": "7일 만에 주름 개선"})
+        detail = self.client.get(reverse("reviews:detail", args=[ReviewRecord.objects.get().pk]))
+        self.assertContains(detail, "검증을 통과한 수정안이 없어")
+        self.assertContains(detail, "보유 실증에 없는 수치(70%)")
+        self.assertNotContains(detail, "탈락 문구")
+
     @mock.patch("core.ai_client.review", side_effect=AIServiceError("AI 서버에 연결하지 못했습니다."))
     def test_review_ai_error_shows_message(self, review):
         response = self.client.post(reverse("reviews:create"), {"product": self.product.pk, "copy_text": "문구"})
@@ -120,7 +137,9 @@ class ReviewTests(BaseTestCase):
         payload = generate.call_args.args[0]
         self.assertEqual(payload["keywords"], ["보습", "촉촉"])
         self.assertEqual(payload["product"]["name"], "수분크림")
-        self.assertContains(self.client.get(reverse("reviews:generation_detail", args=[record.pk])), "촉촉함이 오래 머무는 크림")
+        detail = self.client.get(reverse("reviews:generation_detail", args=[record.pk]))
+        self.assertContains(detail, "촉촉함이 오래 머무는 크림")
+        self.assertNotContains(detail, "주름이 사라지는 크림")
 
 
 class ChatTests(BaseTestCase):

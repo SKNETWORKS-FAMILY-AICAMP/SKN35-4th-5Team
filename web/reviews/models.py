@@ -69,4 +69,5 @@ class GenerationRecord(models.Model):
 
     @property
     def candidates(self) -> list[dict]:
-        return self.response.get("candidates", [])
+        """화면에 보여줄 후보. '제외'(검증 탈락)는 노출하지 않는다."""
+        return [c for c in self.response.get("candidates", []) if c.get("status") != "제외"]

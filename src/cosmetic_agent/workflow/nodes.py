@@ -185,18 +185,40 @@ def verify_copy_node(state: AdReviewState, verifier: CopyVerifier, rule_engine: 
     }
 
 
+NO_VERIFIED_SUGGESTION_NOTE = (
+    "검증을 통과한 수정안이 없어 제안 문구를 표시하지 않습니다. "
+    "문제 표현을 삭제하거나 해당 효능의 실증 자료를 보완한 뒤 다시 검토하세요."
+)
+
+
+def _verified_candidates(state: AdReviewState) -> list[str]:
+    """검증기를 통과한 후보만 강한 순서대로. candidate_details 가 없으면(구버전 제안기) 최종 검증 결과를 따른다."""
+    details = state.get("candidate_details") or []
+    if details:
+        return [d["text"] for d in details if d.get("verified") and d.get("text")]
+    return list(state.get("candidates") or []) if state.get("verify_passed") else []
+
+
 def finalize_node(state: AdReviewState) -> dict[str, Any]:
-    """9. finalize: 결과 계약 검사 및 최종 판정/판단보류 확정"""
+    """9. finalize: 결과 계약 검사 및 최종 판정/판단보류 확정
+
+    [노출 차단 게이트] 재제안 횟수를 다 써도 검증에 실패하면 suggest 노드가 남긴 탈락 문구가
+    그대로 응답에 실렸다(3차 평가 피드백). 최종 응답에는 검증 통과 문구만 남긴다.
+    탈락 사유는 rejected_notes·candidate_details(verified=False)에 그대로 남는다."""
     evidence_ok = state.get("evidence_ok", False)
     if not evidence_ok:
         return {
             "status": "판단보류",
             "review_notes": "신뢰할 수 있는 법령 근거를 찾지 못하여 RA 전문가 검토가 필요합니다.",
         }
-    return {
-        "status": "판정",
-        "review_notes": _review_notes(state),
-    }
+    update: dict[str, Any] = {"status": "판정", "review_notes": _review_notes(state)}
+    if state.get("level", 0) >= 1 and "suggestion" in state:
+        verified = _verified_candidates(state)
+        update["candidates"] = verified
+        if not state.get("verify_passed"):
+            update["suggestion"] = None
+            update["review_notes"] = "\n".join(filter(None, [update["review_notes"], NO_VERIFIED_SUGGESTION_NOTE]))
+    return update
 
 
 def _readable_basis(basis_id: str) -> str:
