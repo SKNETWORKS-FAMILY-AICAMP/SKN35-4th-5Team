@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}내 제품{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>내 제품</h1>
+  <a class="btn" href="{% url 'products:create' %}">제품 등록</a>
+</div>
+<div class="grid">
+  {% for p in products %}
+    <a class="card card-link" href="{% url 'products:detail' p.pk %}">
+      <h2>{{ p.name }}</h2>
+      <p>{{ p.category }}{% if p.functional_type %} · {{ p.functional_type }}{% endif %}</p>
+      <small>보유 실증 {{ p.evidences.all|length }}건</small>
+    </a>
+  {% empty %}
+    <p>등록된 제품이 없습니다. 제품을 등록하면 그 제품의 실증 자료를 기준으로 문구를 검토합니다.</p>
+  {% endfor %}
+</div>
+{% endblock %}

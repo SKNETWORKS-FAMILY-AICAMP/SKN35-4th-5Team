@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ session.title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ session.title }}</h1>
+  <small>{% if session.product %}제품: {{ session.product.name }}{% else %}제품 선택 안 함{% endif %}</small>
+</div>
+<div id="chat-log" class="chat-log"></div>
+<form id="chat-form" class="chat-form" data-send-url="{% url 'chat:send' session.pk %}">
+  {% csrf_token %}
+  <textarea id="chat-input" rows="2" maxlength="5000" placeholder="예: &quot;7일 만에 주름 개선&quot; 이 문구 검토해줘"></textarea>
+  <button type="submit" class="btn">보내기</button>
+</form>
+{{ messages_data|json_script:"chat-messages" }}
+{% endblock %}
+{% block scripts %}<script src="{% static 'js/chat.js' %}"></script>{% endblock %}

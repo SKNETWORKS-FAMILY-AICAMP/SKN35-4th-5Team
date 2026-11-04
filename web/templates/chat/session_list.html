@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}챗봇{% endblock %}
+{% block content %}
+<div class="page-head"><h1>챗봇</h1></div>
+<form method="post" action="{% url 'chat:create' %}" class="card inline-form">
+  {% csrf_token %}
+  <label for="chat-product">대화할 제품</label>
+  <select id="chat-product" name="product">
+    <option value="">선택 안 함 (일반 질문)</option>
+    {% for p in products %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn">새 대화</button>
+</form>
+<ul class="session-list">
+  {% for s in sessions %}
+    <li class="card">
+      <a href="{% url 'chat:room' s.pk %}">{{ s.title }}</a>
+      <small>{% if s.product %}{{ s.product.name }} · {% endif %}{{ s.updated_at|date:"m-d H:i" }}</small>
+      <form method="post" action="{% url 'chat:delete' s.pk %}">{% csrf_token %}<button type="submit" class="link">삭제</button></form>
+    </li>
+  {% empty %}
+    <li>대화가 없습니다.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

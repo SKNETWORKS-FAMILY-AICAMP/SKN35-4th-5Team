@@ -1,0 +1,7 @@
+{% if citations %}
+  <ul class="citations">
+    {% for c in citations %}
+      <li><strong>{{ c.source }} {{ c.article }}</strong>{% if c.content_snippet %}<p>{{ c.content_snippet }}</p>{% endif %}</li>
+    {% endfor %}
+  </ul>
+{% endif %}

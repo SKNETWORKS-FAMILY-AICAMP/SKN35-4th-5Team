@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ product.name }}</h1>
+  <div>
+    <a class="btn" href="{% url 'reviews:create' %}?product={{ product.pk }}">이 제품으로 검토</a>
+    <a class="btn btn-secondary" href="{% url 'reviews:generate' %}?product={{ product.pk }}">광고문 생성</a>
+    <a class="btn btn-secondary" href="{% url 'products:update' product.pk %}">수정</a>
+    <a class="btn btn-danger" href="{% url 'products:delete' product.pk %}">삭제</a>
+  </div>
+</div>
+<section class="card">
+  <dl class="info">
+    <dt>분류</dt><dd>{{ product.category }}{% if product.functional_type %} · {{ product.functional_type }}{% endif %}</dd>
+    {% if product.key_ingredients %}<dt>주요 성분</dt><dd>{{ product.key_ingredients }}</dd>{% endif %}
+    {% if product.ingredients %}<dt>전성분</dt><dd>{{ product.ingredients }}</dd>{% endif %}
+    {% if product.form %}<dt>제형</dt><dd>{{ product.form }}</dd>{% endif %}
+    {% if product.texture %}<dt>질감</dt><dd>{{ product.texture }}</dd>{% endif %}
+    {% if product.scent %}<dt>향</dt><dd>{{ product.scent }}</dd>{% endif %}
+    {% if product.package %}<dt>용량·용기</dt><dd>{{ product.package }}</dd>{% endif %}
+    {% if product.usage_step %}<dt>사용 방법</dt><dd>{{ product.usage_step }}</dd>{% endif %}
+    {% if product.skin_type %}<dt>추천 피부 타입</dt><dd>{{ product.skin_type }}</dd>{% endif %}
+    {% if product.highlight %}<dt>한 줄 특징</dt><dd>{{ product.highlight }}</dd>{% endif %}
+  </dl>
+</section>
+<section class="card">
+  <h2>보유 실증 자료</h2>
+  {% for e in product.evidences.all %}
+    <p><strong>{{ e.test_type }}</strong> · {{ e.item }}{% if e.value %} · {{ e.value }}{% endif %}{% if e.institute %} <small>({{ e.institute }})</small>{% endif %}</p>
+  {% empty %}
+    <p>등록된 실증 자료가 없습니다. 실증이 없으면 효능 표현은 대부분 조건부·불가로 판정됩니다.</p>
+  {% endfor %}
+</section>
+{% endblock %}

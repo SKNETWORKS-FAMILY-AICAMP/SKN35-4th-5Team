@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{% if product %}제품 수정{% else %}제품 등록{% endif %}{% endblock %}
+{% block content %}
+<h1>{% if product %}{{ product.name }} 수정{% else %}제품 등록{% endif %}</h1>
+<form method="post" class="card">
+  {% csrf_token %}
+  {% include "partials/form_fields.html" %}
+  <h2>보유 실증 자료</h2>
+  <p><small>인체적용시험·시험성적서 등 제품이 실제로 보유한 자료만 입력하세요.</small></p>
+  {{ formset.management_form }}
+  {{ formset.non_form_errors }}
+  {% for evidence_form in formset %}
+    <fieldset class="evidence">
+      {% include "partials/form_fields.html" with form=evidence_form %}
+    </fieldset>
+  {% endfor %}
+  <button type="submit" class="btn">저장</button>
+</form>
+{% endblock %}

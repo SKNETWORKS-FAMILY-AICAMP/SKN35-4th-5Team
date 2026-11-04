@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}생성 결과{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>생성 결과 <span class="badge">{{ record.status }}</span></h1>
+  <a class="btn" href="{% url 'reviews:generate' %}{% if record.product_id %}?product={{ record.product_id }}{% endif %}">다시 생성</a>
+</div>
+<section class="card">
+  <p><small>{{ record.product_name }} · {{ record.channel }} · {{ record.tone }} · {{ record.length }}</small></p>
+  <blockquote>{{ record.instruction }}</blockquote>
+  {% for w in record.response.warnings %}<div class="alert alert-warning">{{ w }}</div>{% endfor %}
+</section>
+{% for c in record.candidates %}
+  <section class="card candidate candidate-{{ c.status }}">
+    <h2><span class="badge">{{ c.status }}</span> {{ c.tier }}</h2>
+    {% if c.headline %}<h3>{{ c.headline }}</h3>{% endif %}
+    <p class="copy">{{ c.text }}</p>
+    {% if c.supporting_copy %}<p>{{ c.supporting_copy }}</p>{% endif %}
+    {% if c.rationale %}<p><small>{{ c.rationale }}</small></p>{% endif %}
+    {% if c.notes %}<ul>{% for n in c.notes %}<li><small>{{ n }}</small></li>{% endfor %}</ul>{% endif %}
+  </section>
+{% empty %}
+  <p>생성된 후보가 없습니다.</p>
+{% endfor %}
+{% if record.response.citations %}
+<section class="card"><h2>참고 규정</h2>{% include "partials/citations.html" with citations=record.response.citations %}</section>
+{% endif %}
+<p><small>{{ record.response.disclaimer }}</small></p>
+{% endblock %}

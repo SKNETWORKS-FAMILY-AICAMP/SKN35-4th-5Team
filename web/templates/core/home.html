@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>화장품 광고 문구, 규정 근거로 검토하고 더 안전하게 고쳐드려요</h1>
+  <p>제품이 보유한 실증 자료 범위 안에서 쓸 수 있는 가장 센 문구를 찾아줍니다.</p>
+  {% if not user.is_authenticated %}
+    <a class="btn" href="{% url 'accounts:signup' %}">시작하기</a>
+  {% endif %}
+</section>
+{% if user.is_authenticated %}
+<div class="grid">
+  <section class="card">
+    <h2>내 제품</h2>
+    {% for p in products %}
+      <p><a href="{% url 'products:detail' p.pk %}">{{ p.name }}</a> <small>{{ p.category }}</small></p>
+    {% empty %}
+      <p>등록된 제품이 없습니다.</p>
+    {% endfor %}
+    <a class="btn" href="{% url 'products:create' %}">제품 등록</a>
+  </section>
+  <section class="card">
+    <h2>최근 검토</h2>
+    {% for r in recent_reviews %}
+      <p>{% include "partials/verdict.html" with level=r.level label=r.verdict_label %} <a href="{% url 'reviews:detail' r.pk %}">{{ r.copy_text|truncatechars:40 }}</a></p>
+    {% empty %}
+      <p>아직 검토한 문구가 없습니다.</p>
+    {% endfor %}
+    <a class="btn" href="{% url 'reviews:create' %}">문구 검토하기</a>
+  </section>
+</div>
+{% endif %}
+{% endblock %}

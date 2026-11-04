@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}뷰렛{% endblock %} · Beaurette</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="{% url 'core:home' %}">Beaurette</a>
+    {% if user.is_authenticated %}
+      <nav>
+        <a href="{% url 'products:list' %}">내 제품</a>
+        <a href="{% url 'reviews:create' %}">문구 검토</a>
+        <a href="{% url 'reviews:generate' %}">광고문 생성</a>
+        <a href="{% url 'chat:list' %}">챗봇</a>
+        <a href="{% url 'reviews:list' %}">이력</a>
+      </nav>
+      <form class="nav-user" method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}<span>{{ user.username }}</span><button type="submit" class="link">로그아웃</button>
+      </form>
+    {% else %}
+      <nav class="nav-user">
+        <a href="{% url 'accounts:login' %}">로그인</a>
+        <a href="{% url 'accounts:signup' %}">회원가입</a>
+      </nav>
+    {% endif %}
+  </header>
+  <main class="container">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

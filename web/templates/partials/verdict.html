@@ -1,0 +1,2 @@
+{# 판정 배지. include 할 때 level(0/1/2/None) 과 label 을 넘긴다 #}
+<span class="badge badge-{{ level|default_if_none:'hold' }}">{{ label }}</span>
