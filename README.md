@@ -23,14 +23,12 @@
     <tr>
       <td align="center" valign="middle" width="160"><img src="docs/team/kim-gyeongmin-portrait.jpg" alt="김경민 소개 이미지" width="160" height="213"></td>
       <td align="center" valign="middle" width="160"><img src="docs/team/kwon-junho-portrait.jpg" alt="권준호 소개 이미지" width="160" height="213"></td>
-      <td align="center" valign="middle" width="160"><img src="docs/team/yu-jiho-portrait.jpg" alt="유지호 소개 이미지" width="160" height="213"></td>
       <td align="center" valign="middle" width="160"><img src="docs/team/lee-hyeongmin-portrait.jpg" alt="이형민 소개 이미지" width="160" height="213"></td>
       <td align="center" valign="middle" width="160"><img src="docs/team/lee-sehee-portrait.jpg" alt="이세희 소개 이미지" width="160" height="213"></td>
     </tr>
     <tr>
       <td align="center"><strong>김경민</strong></td>
       <td align="center"><strong>권준호</strong></td>
-      <td align="center"><strong>유지호</strong></td>
       <td align="center"><strong>이형민</strong></td>
       <td align="center"><strong>이세희</strong></td>
     </tr>
@@ -45,7 +43,6 @@
 | --- | --- | --- | --- | --- |
 | **김경민** | [`kgm`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/tree/kgm) | 시스템 기반 설계 · API · 통합 챗봇 | 프로젝트 구조·LangGraph 워크플로 골격 설계, FastAPI 검토 API·입력 검증, 자연어 요청의 검토/생성/질문 분기와 대화 맥락 처리, 챗봇 팝업·사이드바 개선, Docker 구성 및 PR 통합 | [API·검증](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/e5cf529) · [챗봇 Q&A](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/52948a8) |
 | **권준호** | [`kjh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/tree/kjh) | 판정 엔진 · 평가 · 시장 비교 | 규칙·GPT 판정 및 베이스라인 평가, 효능별 실증 수치 대조, 시장 문구·공개 실증·성분 근거 연결, 창작 광고 세트, 후보 비교 및 예상 매출 시나리오 연결 | [판정·평가](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/a8e57f8) · [수치 검증](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/74385e0) · [후보 비교](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/84794e1) |
-| **유지호** | [`yjh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/tree/yjh) | RAG · 인덱싱 · 광고문 생성 | 조항 단위 청킹, Qdrant Cloud 적재·BM25 색인, 하이브리드 검색과 메타데이터·경량 reranker 개선, 검색 평가, 검토 기준에 따른 광고문 생성 워크플로 구현 | [벡터 DB 적재](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/07d61a4) · [생성 워크플로](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/379286c) · [검색 개선](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/7a97bf8) |
 | **이세희** | [`lsh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/tree/lsh) | Streamlit UI · UX · 시각 디자인 | 검토 대화·상세페이지·규정 열람 화면, 근거 패널과 위험 표현 연동, 후보 선택·진행 상태 UI, 홈 화면 및 브랜드 디자인, 공통 스타일·접근성 개선 | [검토 화면](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/bb20da5) · [검토 UX](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/d988ed9) · [홈 디자인](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/f61e935) |
 | **이형민** | [`lhm`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/tree/lhm) | 데이터 · 교정/역검증 · 배포 | 법령·지침·사례·성분 데이터 및 골든셋 구축, 실증 범위에 따른 교정 후보 제안·역검증, 제품 직접 등록·성분 검색, 생성 재료·후보 선별 개선, Render 배포 및 통합 안정화 | [원본 데이터](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/489313a) · [제안·검증](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/d9f882e) · [배포 구성](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-3rd-5Team/commit/66980ac) |
 
