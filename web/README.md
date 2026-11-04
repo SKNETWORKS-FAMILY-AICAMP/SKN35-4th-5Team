@@ -6,7 +6,7 @@ Django는 회원·제품·이력(DB)과 화면을 맡고, 검토·생성·챗봇
 ```
 브라우저 ──► Django (web/, :8001) ──httpx──► FastAPI AI 서버 (api/, :8000) ──► OpenAI · Qdrant
                  │
-                 └──► DB (로컬 SQLite / 운영 PostgreSQL)
+                 └──► DB (로컬 SQLite / 운영 MySQL 또는 PostgreSQL)
 ```
 
 ## 로컬 실행
@@ -58,6 +58,8 @@ uv run python manage.py test
 
 ## 배포 시 환경변수
 
+EC2에서는 [Django/RDS 배포 가이드](../docker/README.django.md)와 루트 `docker-compose.web.yml`을 사용합니다. 운영용 예제는 `docker/web.env.example`이며, `DEBUG=False`일 때 MySQL 또는 PostgreSQL 연결과 50자 이상의 `DJANGO_SECRET_KEY`가 필수입니다. `/health/ready/`와 `manage.py check_database`로 DB 연결·마이그레이션 상태를 확인할 수 있습니다.
+
 `web/.env.example` 참고. 운영에서는 최소한 다음을 설정합니다.
 
 | 변수 | 예시 |
@@ -66,15 +68,16 @@ uv run python manage.py test
 | `DJANGO_SECRET_KEY` | 긴 임의 문자열 (필수) |
 | `DJANGO_ALLOWED_HOSTS` | `13.125.x.x,beaurette.example.com` |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | `http://13.125.x.x` |
-| `DATABASE_URL` | `postgres://beaurette:비밀번호@db:5432/beaurette` |
+| `DATABASE_URL` | `mysql://beaurette_app:인코딩한비밀번호@RDS_엔드포인트:3306/beaurette` |
+| `DATABASE_SSL_ROOT_CERT` | `/app/certs/rds-global-bundle.pem` (배포 이미지에 포함) |
 | `AI_API_URL` | `http://api:8000` (docker-compose 서비스 이름) |
 
 실행 명령 (컨테이너):
 
 ```bash
 python manage.py migrate --noinput
-python manage.py collectstatic --noinput   # → web/staticfiles/, Nginx가 /static/ 으로 서빙
+python manage.py collectstatic --noinput   # Docker 빌드에서 실행, Caddy가 /static/ 으로 서빙
 gunicorn config.wsgi:application --bind 0.0.0.0:8001 --workers 2 --timeout 200
 ```
 
-AI 응답이 1~2분 걸릴 수 있으므로 Gunicorn `--timeout` 과 Nginx `proxy_read_timeout` 을 180초 이상으로 둡니다.
+AI 응답이 1~2분 걸릴 수 있으므로 배포 설정은 Gunicorn timeout 200초, Caddy response_header_timeout 210초를 사용합니다. DB 마이그레이션은 서버 시작 전에 별도 명령으로 실행합니다.

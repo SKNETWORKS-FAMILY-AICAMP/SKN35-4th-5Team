@@ -16,5 +16,17 @@ finetune
 output
 .env*
 .streamlit/secrets.toml
+
+# Django has its own environment and local database under web/.
+**/.env
+**/.env.*
+**/.venv
+**/__pycache__
+**/*.pyc
+**/*.sqlite3
+**/*.sqlite3-*
+**/staticfiles
+**/.pytest_cache
+**/.uv-cache
 data/02_processed/*.pkl
 data/golden_set
