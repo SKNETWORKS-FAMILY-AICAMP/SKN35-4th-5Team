@@ -56,7 +56,6 @@ Django 웹에서 제품과 실증 자료를 관리하고, FastAPI · LangGraph �
 | **이형민** | [`lhm`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/lhm) | Django 백엔드, 회원·제품·이력·대화 저장, AI 연동, 검증 실패 문구 차단, 예시 제품 불러오기 | [`web/`](web/) · [Django 웹 서비스 구현](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/4eb4d4a) · [검증 실패 문구 차단](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/b052390) · [예시 제품·실증 출처](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/8c9fad1) |
 | **이세희** | [`lsh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/lsh) | 기본 화면 제작, 프로젝트 발표 | 현재 웹 화면의 기반이 된 초기 화면 제작 · 프로젝트 발표 담당 |
 
-이세희가 제작한 기본 화면을 바탕으로 권준호가 HTML 전환과 화면 변형·확장을 진행했습니다. 공동 수정·통합된 기능은 주 기여 영역으로 표시했습니다.
 
 ---
 
