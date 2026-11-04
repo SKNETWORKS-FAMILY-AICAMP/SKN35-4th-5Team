@@ -28,13 +28,9 @@ uv run python manage.py runserver 8001
 
 http://localhost:8001 접속. AI 서버 연결 상태는 http://localhost:8001/health/ 에서 확인합니다.
 
-## 테스트
+## 실행 상태 확인
 
-`web/`에서 실행합니다. 2026-11-04 현재 코드 기준 36개 테스트가 통과했습니다. 별도 SQLite 테스트 DB와 AI 응답 대역으로 회원·제품·이력·챗봇·추가 화면·운영 설정을 검사하며, 실제 AI 및 RDS 연결은 별도로 확인합니다.
-
-```bash
-uv run python manage.py test
-```
+`uv run python manage.py check`로 Django 설정을, `uv run python manage.py check_database`로 DB 연결과 마이그레이션 적용 상태를 확인합니다. `/health/ready/`는 DB 준비 상태를, `/health/`는 AI 서버 연결 상태를 반환합니다.
 
 ## 앱 구성
 
@@ -77,7 +73,7 @@ uv run python manage.py test
 - 챗봇·처리 중 표시: `static/js/chat.js`, `static/js/loading.js`
 - 폰트·브랜드·사진: `static/fonts/`, `static/brand/`, `static/landing/`
 
-고정 참고 자료는 `core/reference/`에 포함됩니다. 원본 자료 변경 시 저장소 루트에서 `uv run python web/scripts/export_reference.py`로 갱신합니다. 예시 제품은 `products/sample_products.json`을 사용하며, 원본 제품 자산과의 일치 여부를 테스트에서 검사합니다.
+고정 참고 자료는 `core/reference/`에 포함됩니다. 규정·사례·처분 기준·효과 크기 자료가 바뀌면 해당 JSON과 원본 출처를 함께 갱신합니다. 예시 제품은 `products/sample_products.json`을 사용합니다.
 
 ### 챗봇 전송 API
 

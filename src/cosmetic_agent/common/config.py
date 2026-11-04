@@ -17,7 +17,6 @@ PROJECT_ROOT: Path = Path(os.getenv("PROJECT_ROOT", str(DEFAULT_ROOT))).resolve(
 DATA_DIR: Path = PROJECT_ROOT / "data"
 ASSETS_DIR: Path = DATA_DIR / "assets"
 PROCESSED_DIR: Path = DATA_DIR / "02_processed"
-GOLDEN_SET_DIR: Path = DATA_DIR / "golden_set"
 
 
 class Settings(BaseSettings):
@@ -26,7 +25,6 @@ class Settings(BaseSettings):
     PROJECT_ROOT_PATH: Path = PROJECT_ROOT
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8000
-    API_BASE_URL: str = "http://localhost:8000"
 
     # OpenAI & LLM API (기본값: 표준 OpenAI, 커스텀/NVIDIA 사용자는 .env에서 오버라이드)
     OPENAI_API_KEY: str = ""
@@ -48,16 +46,12 @@ class Settings(BaseSettings):
     FUNCTIONAL_CLAIMS_PATH: Path = ASSETS_DIR / "functional_claims.json"
     COPY_GUARD_PATH: Path = ASSETS_DIR / "copy_guard.json"
     TERM_MAP_PATH: Path = ASSETS_DIR / "term_map.json"
-    MOCK_PRODUCTS_PATH: Path = ASSETS_DIR / "mock_products.json"
-    DEV_SET_PATH: Path = GOLDEN_SET_DIR / "dev.jsonl"
-    HOLDOUT_SET_PATH: Path = GOLDEN_SET_DIR / "holdout.jsonl"
 
     # 공공데이터포털 (화장품 원료성분정보 등)
     DATA_GO_KR_API_KEY: str = ""
 
-    # Judge Backend (rule / gpt / ft)
-    JUDGE_BACKEND: Literal["rule", "gpt", "ft"] = "rule"
-    FT_ADAPTER_PATH: Path = PROJECT_ROOT / "finetune" / "adapters" / "qwen_ad_judge_v1"
+    # Judge Backend (rule / gpt)
+    JUDGE_BACKEND: Literal["rule", "gpt"] = "rule"
 
     # LangSmith
     LANGSMITH_TRACING: bool = False
@@ -73,7 +67,7 @@ class Settings(BaseSettings):
 
     @field_validator(
         "OPENAI_API_KEY", "OPENAI_BASE_URL", "QDRANT_URL", "QDRANT_API_KEY",
-        "QDRANT_COLLECTION_NAME", "API_BASE_URL", mode="before",
+        "QDRANT_COLLECTION_NAME", mode="before",
     )
     @classmethod
     def _strip_pasted_value(cls, value, info: ValidationInfo):

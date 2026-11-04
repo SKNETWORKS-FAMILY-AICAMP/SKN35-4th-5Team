@@ -6,9 +6,9 @@ SK Networks Family AI Camp 35기 · **4차 프로젝트 · 5팀**
 
 Django 웹에서 제품과 실증 자료를 관리하고, FastAPI · LangGraph · Qdrant 기반 RAG 엔진으로 광고 문구를 검토·교정·생성합니다. 상세페이지 일괄 검토, 규정 검색, 통합 챗봇과 예상 매출 시나리오를 하나의 화면 흐름으로 제공합니다.
 
-**[서비스 바로가기](https://beaurette.duckdns.org)** · [주요 기능](#2-주요-기능) · [시스템 아키텍처](#3-시스템-아키텍처) · [데이터와 평가](#5-데이터와-평가)
+**[서비스 바로가기](https://beaurette.duckdns.org)** · [주요 기능](#2-주요-기능) · [시스템 아키텍처](#3-시스템-아키텍처) · [운영 데이터](#5-운영-데이터)
 
-[팀 저장소](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team) · [Django 웹 가이드](web/README.md) · [AI API 가이드](api/README.md) · [AWS 배포 가이드](docker/README.django.md) · [4차 역할 분담 계획서](plan.md)
+[팀 저장소](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team) · [Django 웹 가이드](web/README.md) · [AI API 가이드](api/README.md) · [AWS 배포 가이드](docker/README.django.md)
 
 <h2 align="center">🛠️ Tech Stack</h2>
 
@@ -22,7 +22,7 @@ Django 웹에서 제품과 실증 자료를 관리하고, FastAPI · LangGraph �
     <tr><td align="center"><strong>AI &amp; Agents</strong></td><td align="center"><img alt="OpenAI API" src="https://img.shields.io/badge/OpenAI_API-412991?style=flat"> <img alt="LangChain" src="https://img.shields.io/badge/LangChain-1C3C3C?style=flat&amp;logo=langchain&amp;logoColor=white"> <img alt="LangGraph" src="https://img.shields.io/badge/LangGraph-1C3C3C?style=flat&amp;logo=langgraph&amp;logoColor=white"></td></tr>
     <tr><td align="center"><strong>Database &amp; Search</strong></td><td align="center"><img alt="MySQL" src="https://img.shields.io/badge/MySQL-4479A1?style=flat&amp;logo=mysql&amp;logoColor=white"> <img alt="SQLite" src="https://img.shields.io/badge/SQLite-003B57?style=flat&amp;logo=sqlite&amp;logoColor=white"> <img alt="Qdrant Cloud" src="https://img.shields.io/badge/Qdrant_Cloud-DC244C?style=flat&amp;logo=qdrant&amp;logoColor=white"> <img alt="BM25" src="https://img.shields.io/badge/BM25-2563EB?style=flat"> <img alt="Hybrid RRF" src="https://img.shields.io/badge/Hybrid_RRF-7C3AED?style=flat"></td></tr>
     <tr><td align="center"><strong>Server &amp; Cloud</strong></td><td align="center"><img alt="AWS EC2" src="https://img.shields.io/badge/AWS_EC2-FF9900?style=flat"> <img alt="Amazon RDS" src="https://img.shields.io/badge/Amazon_RDS-527FFF?style=flat"> <img alt="Docker Compose" src="https://img.shields.io/badge/Docker_Compose-2496ED?style=flat&amp;logo=docker&amp;logoColor=white"> <img alt="Caddy" src="https://img.shields.io/badge/Caddy-1F88C0?style=flat"> <img alt="Gunicorn" src="https://img.shields.io/badge/Gunicorn-499848?style=flat&amp;logo=gunicorn&amp;logoColor=white"> <img alt="Uvicorn" src="https://img.shields.io/badge/Uvicorn-4051B5?style=flat"></td></tr>
-    <tr><td align="center"><strong>Tools &amp; Testing</strong></td><td align="center"><img alt="uv" src="https://img.shields.io/badge/uv-DE5FE9?style=flat&amp;logo=uv&amp;logoColor=white"> <img alt="Git" src="https://img.shields.io/badge/Git-F05032?style=flat&amp;logo=git&amp;logoColor=white"> <img alt="GitHub" src="https://img.shields.io/badge/GitHub-181717?style=flat&amp;logo=github&amp;logoColor=white"> <img alt="pytest" src="https://img.shields.io/badge/pytest-0A9EDC?style=flat&amp;logo=pytest&amp;logoColor=white"></td></tr>
+    <tr><td align="center"><strong>Tools</strong></td><td align="center"><img alt="uv" src="https://img.shields.io/badge/uv-DE5FE9?style=flat&amp;logo=uv&amp;logoColor=white"> <img alt="Git" src="https://img.shields.io/badge/Git-F05032?style=flat&amp;logo=git&amp;logoColor=white"> <img alt="GitHub" src="https://img.shields.io/badge/GitHub-181717?style=flat&amp;logo=github&amp;logoColor=white"></td></tr>
   </tbody>
 </table>
 
@@ -248,13 +248,13 @@ Caddy가 HTTPS와 정적 파일을 제공하고 Gunicorn은 Docker 내부에서 
 - 검토 검색은 기본 Top 4를 사용하고 경량 reranker로 내부 순서를 조정합니다. 생성 흐름은 별도 검색 개수를 사용합니다.
 - Dense 검색에 실패하면 BM25로 검색을 이어가며, 근거가 부족하면 판단보류 경로를 사용합니다.
 
-구현: [`rag/`](src/cosmetic_agent/rag/) · [`indexing/`](indexing/) · [검색 설정](configs/retrieval.yaml)
+구현: [`rag/`](src/cosmetic_agent/rag/) · [`indexing/`](indexing/) · [검색기 구성](src/cosmetic_agent/service.py)
 
 ### 규칙 판정을 하한으로 두는 구조
 
-규칙·GPT zero-shot·few-shot을 동일 개발셋에서 비교한 결과, GPT의 정상 문구 과잉 경고와 불가→조건부 완화가 확인됐습니다. 기본 판정 백엔드는 `rule`로 두고, GPT를 사용하는 경우에도 명확한 규칙 위반과 실증 수치 충돌을 더 낮은 위험도로 덮어쓰지 않도록 구성했습니다.
+기본 판정 백엔드는 `rule`입니다. `gpt`를 선택하면 LLM 판정을 함께 사용하되, 명확한 규칙 위반과 실증 수치 충돌을 더 낮은 위험도로 덮어쓰지 않도록 구성했습니다.
 
-구현: [`rules.py`](src/cosmetic_agent/domain/rules.py) · [`gpt_judge.py`](src/cosmetic_agent/models/gpt_judge.py) · [판정 평가 보고서](eval/reports/dev_comparison_2026-10-13.md)
+구현: [`rules.py`](src/cosmetic_agent/domain/rules.py) · [`gpt_judge.py`](src/cosmetic_agent/models/gpt_judge.py)
 
 ### 실증 수치의 잘못된 조합 차단
 
@@ -262,7 +262,7 @@ Caddy가 HTTPS와 정적 파일을 제공하고 Gunicorn은 Docker 내부에서 
 
 예: 보습 시험의 `4주·35%`와 탄력 시험의 `2주·70%`를 이용해 `2주 보습력 70% 개선`을 만드는 경우를 차단합니다.
 
-구현: [`verifier.py`](src/cosmetic_agent/domain/verifier.py) · [회귀 테스트](tests/unit/test_review_regressions.py)
+구현: [`verifier.py`](src/cosmetic_agent/domain/verifier.py)
 
 ### 생성과 검증의 분리
 
@@ -270,22 +270,7 @@ LLM은 확인된 제품 사실·성분 역할·시장 표현을 재료로 후보
 
 구현: [`generation/`](src/cosmetic_agent/generation/) · [`copy_suggester.py`](src/cosmetic_agent/models/copy_suggester.py) · [`appeal_ranker.py`](src/cosmetic_agent/models/appeal_ranker.py)
 
-## 5. 데이터와 평가
-
-### Django 웹 검증
-
-**2026-11-04, 현재 코드의 Django 테스트 36개 통과.** 별도 SQLite 테스트 DB와 AI 응답 대역을 사용했으며, 시스템 검사에서도 문제가 발견되지 않았습니다.
-
-| 검증 영역 | 주요 항목 |
-| --- | --- |
-| 회원·제품 | 로그인 필요 페이지, 타인 제품 접근 제한, 예시 제품 복사·형식·출처 |
-| 검토·생성·챗봇 | 이력 저장, 검증 통과 수정안이 없을 때 안내, AI 오류 처리, 메시지·맥락 보존 |
-| 추가 기능 화면 | 상세페이지 문장별 결과·교정본, 규정 검색·사전·사례, 매출 가정·법령 근거 연결 |
-| 운영 설정 | 강한 비밀키·운영 DB 요구, RDS TLS 설정, DB·마이그레이션 readiness |
-
-테스트 코드: [`tests.py`](web/core/tests.py) · [`test_studio.py`](web/core/test_studio.py) · [`test_deployment.py`](web/core/test_deployment.py). 실행 방법은 [웹 테스트 안내](web/README.md#테스트)를 참고하세요. 이 결과는 실제 OpenAI·Qdrant·RDS 통합 성능이나 부하 시험 결과를 의미하지 않습니다.
-
-아래 AI 평가 수치는 저장된 보고서의 측정 시점을 유지했습니다. 웹 기능 테스트와 별도로 읽어야 합니다.
+## 5. 운영 데이터
 
 ### 데이터 구성
 
@@ -294,7 +279,6 @@ LLM은 확인된 제품 사실·성분 역할·시장 표현을 재료로 후보
 | 규정 원문 | 법령·고시 5종, 관리지침 1종, 적발 사례 6건 | [원본 데이터](data/01_raw/README.md) |
 | 검색 데이터 | 조항 청크·검색 메타데이터, Qdrant 및 BM25 인덱스 | [`data/02_processed/`](data/02_processed/) |
 | 규칙 자산 | 금지 표현·기능성 범위·표현 단계·제품 예시 | [`data/assets/`](data/assets/) |
-| 판정 벤치마크 | 팀 작성 dev 45문항·holdout 21문항 | [`data/golden_set/`](data/golden_set/) |
 | 성분 지식 | 원료성분 21,945개와 생성·설명용 참고 자료 | [성분 지식](data/ingredient_knowledge/README.md) |
 | 시장·표현 참고 | 시장 제품·광고 문구·표현 은행 | [시장 자료](data/market_reference/README.md) · [표현 은행](data/copy_bank/README.md) |
 | 웹 예시 제품 | 회원별 복사·편집이 가능한 23개 제품 | [`예시 제품`](web/products/sample_products.json) |
@@ -302,86 +286,50 @@ LLM은 확인된 제품 사실·성분 역할·시장 표현을 재료로 후보
 
 원본 문서의 버전·수집 내역·출처는 각 데이터 문서에 기록합니다. 규칙 자산을 변경할 때는 [`scripts/build_rule_assets.py`](scripts/build_rule_assets.py)를 수정한 뒤 다시 생성합니다.
 
-### 판정 백엔드 비교
-
-2026-10-13 저장 보고서 기준, 팀 작성 **dev 45문항**에 대한 독립 사전 판정 결과입니다. 검색·교정·역검증을 포함한 전체 서비스 평가는 아닙니다.
-
-| 지표 | Rule | GPT zero-shot | GPT few-shot |
-| --- | ---: | ---: | ---: |
-| 수준 정확도 | 100.0% (45/45) | 68.9% (31/45) | 73.3% (33/45) |
-| Macro-F1 (0/1/2 고정) | 1.000 | 0.639 | 0.612 |
-| 불가→가능 오류 | 0건 | 0건 | 0건 |
-| 불가→조건부 오류 | 0건 | 6건 | 1건 |
-| 정상 문구 과잉 경고 | 0.0% | 50.0% | 66.7% |
-
-규칙 개발에 사용한 소규모 개발셋이므로 Rule의 100%를 미관측 문구에 대한 성능으로 일반화할 수 없습니다. few-shot은 전체 정확도를 높였지만 정상 문구 과잉 경고도 늘려 Macro-F1은 낮아졌습니다.
-
-출처: [판정 비교 보고서 및 오류 분석](eval/reports/dev_comparison_2026-10-13.md)
-
-### 검색 방식 비교
-
-2026-10-14 저장 보고서 기준입니다. 검색 인덱스는 59개 청크이며, 필수 인용 정답이 있는 dev 33문항·holdout 16문항만 검색 지표에 포함했습니다.
-
-| 평가셋 | 검색 방식 | Strict Hit@4 | Evidence Coverage@4 | MRR |
-| --- | --- | ---: | ---: | ---: |
-| dev (33) | Dense | 42.4% | 66.7% | 0.3351 |
-| dev (33) | BM25 | 57.6% | 81.8% | 0.4904 |
-| dev (33) | **Hybrid** | **69.7%** | **81.8%** | **0.5404** |
-| holdout 회귀셋 (16) | Dense | 43.8% | 56.2% | 0.4376 |
-| holdout 회귀셋 (16) | BM25 | 50.0% | 93.8% | 0.4062 |
-| holdout 회귀셋 (16) | **Hybrid** | **75.0%** | **100.0%** | **0.4369** |
-
-- **Strict Hit@4**: 지정된 필수 근거가 상위 4개 결과에 포함된 비율입니다.
-- **Evidence Coverage@4**: 필수 근거 또는 평가셋이 허용한 관련 근거가 포함된 비율입니다. 최종 답변의 법적 정확도나 충분성을 뜻하지 않습니다.
-- **MRR**: 첫 필수 근거의 순위 역수 평균입니다.
-
-holdout은 반복 실행하는 고정 회귀셋으로 사용했으므로 블라인드 최종 성능으로 제시하지 않습니다. 표는 해당 날짜에 저장된 결과이며 이후 코드 변경의 성능을 보증하지 않습니다.
-
-출처: [dev 검색 보고서](eval/reports/rag_retrieval_dev_2026-10-14.md) · [holdout 검색 보고서](eval/reports/rag_retrieval_holdout_2026-10-14.md)
-
-
 ## 6. 디렉토리 구조
 
 ```text
 ├── api/                       # FastAPI 라우트·요청 처리
-├── web/                       # 4차 Django 웹 서비스 (별도 uv 프로젝트)
+├── web/                       # Django 웹 서비스 (별도 uv 프로젝트)
 │   ├── config/                # Django 설정·URL·WSGI
 │   ├── core/                  # 홈·일괄 검토·규정·시나리오·AI 클라이언트
-│   │   └── reference/         # 관리지침·적발 사례·처분 기준 등 고정 참고 자료
+│   │   └── reference/         # 관리지침·사례·처분 기준·시나리오 참고 자료
 │   ├── accounts/              # 회원가입·로그인·로그아웃
-│   ├── products/              # 사용자별 제품·실증·예시 제품 불러오기
+│   ├── products/              # 사용자별 제품·실증·예시 제품
 │   ├── reviews/               # 검토·생성 요청과 이력
 │   ├── chat/                  # 대화방·메시지·대화 맥락
 │   ├── templates/             # Django HTML 템플릿
-│   ├── static/                # CSS·JavaScript·폰트·브랜드 자산
-│   └── scripts/               # 참고 자료 내보내기·랜딩 화면 생성
-├── app/                       # 기존 Streamlit 참고 앱
-├── configs/                   # 판정·검색·재시도 설정
-├── data/
-│   ├── 01_raw/                # 규정·사례·원료성분 원본
-│   ├── 02_processed/          # 조항 청크·BM25 인덱스
-│   ├── assets/                # 규칙·표현 단계·제품 자산
-│   ├── golden_set/            # 팀 작성 판정 벤치마크
-│   ├── ingredient_knowledge/  # 성분 참고 지식
-│   ├── market_reference/      # 시장 제품·문구 참고
-│   ├── copy_bank/             # 표현 은행
-│   └── sales_forecast_reference/ # 시나리오·공개 비교 실험 자료
-├── indexing/                  # 원문 청킹·메타데이터·색인 생성
+│   └── static/                # CSS·JavaScript·폰트·브랜드 자산
+├── data/                      # 규정 원문·검색 청크·규칙·성분·시장 참고 자료
+├── indexing/                  # 성분 갱신·원문 청킹·메타데이터·색인 생성
 ├── src/cosmetic_agent/
-│   ├── common/                # 환경설정·로깅·예외
+│   ├── common/                # 환경설정·로깅
 │   ├── domain/                # 스키마·규칙·실증 검증
 │   ├── rag/                   # Dense·BM25·RRF·reranker
 │   ├── models/                # 판정·교정·생성·챗봇 모델
 │   ├── workflow/              # 검토 LangGraph
 │   ├── generation/            # 생성 LangGraph
 │   └── service.py             # 검토 서비스 진입점
-├── eval/                      # 판정 평가·저장 보고서
-├── tests/                     # 단위·통합 테스트
-├── scripts/                   # 데이터 구축·검색 평가·배포 보조
+├── scripts/                   # 규칙·표현 은행 구축, 운영 연결 점검
 ├── docker/                    # API·웹 이미지, Caddy, 운영 환경변수·배포 안내
-├── docker-compose.web.yml     # 4차 Django + FastAPI + Caddy 배포
-├── docker-compose.yml         # 기존 FastAPI + Streamlit 실행
-├── docs/                      # 참고 화면·다이어그램·이전 계획서
-├── finetune/                  # 향후 파인튜닝 실험 골격
-└── plan.md                    # 4차 역할 분담·일정·테스트 계획
+├── docker-compose.web.yml     # Django + FastAPI + Caddy 배포
+└── docs/                      # 현재 화면·팀 소개·워크플로 다이어그램
 ```
+
+## 7. 실행과 배포
+
+로컬 실행은 [Django 웹 가이드](web/README.md), 운영 배포는 [AWS 배포 가이드](docker/README.django.md)를 따릅니다. API 의존성은 루트 `uv.lock`·`requirements.txt`, 웹 의존성은 `web/uv.lock`으로 고정합니다.
+
+```bash
+# API: 루트 .env 설정 후
+uv sync --locked
+uv run uvicorn api.main:app --port 8000
+
+# 웹: 별도 터미널, web/.env 설정 후
+cd web
+uv sync --locked
+uv run python manage.py migrate
+uv run python manage.py runserver 8001
+```
+
+운영은 `docker compose --env-file web/.env -f docker-compose.web.yml` 명령을 사용합니다. `api`, `web`, `proxy`가 이 파일에 모두 정의되어 있습니다. 배포 전 DB 연결과 마이그레이션은 `manage.py check_database`, 배포 후 준비 상태는 `/health/ready/`로 확인합니다.

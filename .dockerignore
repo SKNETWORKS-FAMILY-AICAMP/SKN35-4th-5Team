@@ -10,12 +10,7 @@ __pycache__
 .codex
 .agents
 .aws
-tests
-eval
-finetune
-output
 .env*
-.streamlit/secrets.toml
 
 # Django has its own environment and local database under web/.
 **/.env
@@ -29,4 +24,3 @@ output
 **/.pytest_cache
 **/.uv-cache
 data/02_processed/*.pkl
-data/golden_set

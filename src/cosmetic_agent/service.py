@@ -1,6 +1,6 @@
 """
 [service.py]
-FastAPI 및 Streamlit이 호출하는 단일 비즈니스 로직 진입점(Facade Service).
+FastAPI가 호출하는 단일 비즈니스 로직 진입점(Facade Service).
 """
 import time
 from typing import Any
