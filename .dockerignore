@@ -6,7 +6,15 @@ __pycache__
 *.pyo
 *.pyd
 .pytest_cache
+.ruff_cache
+.codex
+.agents
+.aws
 tests
 eval
 finetune
-.env
+output
+.env*
+.streamlit/secrets.toml
+data/02_processed/*.pkl
+data/golden_set

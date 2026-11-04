@@ -335,6 +335,19 @@ uv run streamlit run app/streamlit_app.py
 
 실행 환경에 이미 설정한 환경변수는 `.env`보다 우선합니다. API 모드에서는 서버 오류를 Mock 응답으로 대체하지 않고 오류로 표시합니다.
 
+### Docker / AWS EC2 실행
+
+루트 `docker-compose.yml`은 FastAPI와 Streamlit만 실행하고, `.env`에 지정한 **기존 Qdrant Cloud**에 연결합니다. RDS나 로컬 Qdrant 컨테이너는 만들지 않습니다. Docker Engine 및 Docker Compose 2.20.0 이상을 설치한 서버에서 실행하세요.
+
+```bash
+# .env에 기존 OpenAI / Qdrant Cloud 접속 정보를 설정한 뒤
+docker compose config --quiet
+docker compose up -d --build --wait --wait-timeout 180
+docker compose exec api python scripts/check_connections.py
+```
+
+화면은 `http://<EC2_PUBLIC_IP>:8501`에서 확인합니다. API의 8000 포트는 서버의 `127.0.0.1`에만 바인딩됩니다. 이미지 빌드 중에는 로컬 BM25만 생성하며, 기존 Qdrant 컬렉션을 변경하거나 임베딩 API를 호출하지 않습니다. EC2 네트워크 설정, 환경변수, 점검 및 갱신 절차는 [EC2 배포 가이드](docker/README.md)를 참고하세요.
+
 ## 7. API
 
 | Method | 경로 | 기능 |

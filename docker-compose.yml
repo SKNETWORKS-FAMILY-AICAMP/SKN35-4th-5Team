@@ -1,42 +1,45 @@
-﻿services:
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: cosmetic-qdrant
-    ports:
-      - "6333:6333"
-    volumes:
-      - qdrant_storage:/qdrant/storage
-    restart: unless-stopped
+name: beaurette
 
+# EC2 / local Docker deployment with the existing Qdrant Cloud collection.
+# Credentials are injected into the API at runtime from the root .env file.
+services:
   api:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
-    container_name: cosmetic-api
     ports:
-      - "8000:8000"
-    environment:
-      - QDRANT_URL=http://qdrant:6333
+      # Host-only diagnostics; the UI connects through Docker's internal network.
+      - "127.0.0.1:8000:8000"
     env_file:
       - .env
-    depends_on:
-      - qdrant
+    environment:
+      PROJECT_ROOT: /app
+      PROJECT_ROOT_PATH: /app
+      BM25_INDEX_PATH: /app/data/02_processed/bm25_index.pkl
+    init: true
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   app:
     build:
       context: .
       dockerfile: docker/Dockerfile.app
-    container_name: cosmetic-app
     ports:
       - "8501:8501"
     environment:
-      - API_BASE_URL=http://api:8000
-    env_file:
-      - .env
+      API_BASE_URL: http://api:8000
+      UI_DATA_MODE: api
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    init: true
     restart: unless-stopped
-
-volumes:
-  qdrant_storage:
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
