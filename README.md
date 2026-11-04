@@ -6,7 +6,7 @@ SK Networks Family AI Camp 35기 · **4차 프로젝트 · 5팀**
 
 Django 웹에서 제품과 실증 자료를 관리하고, FastAPI · LangGraph · Qdrant 기반 RAG 엔진으로 광고 문구를 검토·교정·생성합니다. 상세페이지 일괄 검토, 규정 검색, 통합 챗봇과 예상 매출 시나리오를 하나의 화면 흐름으로 제공합니다.
 
-**[서비스 바로가기](https://beaurette.duckdns.org)** · [주요 기능](#2-주요-기능) · [시스템 아키텍처](#3-시스템-아키텍처) · [운영 데이터](#5-운영-데이터)
+**[서비스 바로가기](https://beaurette.duckdns.org)** · [시연 영상](#시연-영상) · [주요 기능](#2-주요-기능) · [시스템 아키텍처](#3-시스템-아키텍처) · [운영 데이터](#5-운영-데이터)
 
 [팀 저장소](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team) · [Django 웹 가이드](web/README.md) · [AI API 가이드](api/README.md) · [AWS 배포 가이드](docker/README.django.md)
 
@@ -58,6 +58,14 @@ Django 웹에서 제품과 실증 자료를 관리하고, FastAPI · LangGraph �
 
 
 ---
+
+## 시연 영상
+
+홈·로그인부터 광고문 생성·검토, 통합 챗봇, 규정·가이드라인과 예상 매출 시나리오까지의 실제 사용 흐름입니다.
+
+[![Beaurette 전체 시연 · 4배속 자동 반복 미리보기](docs/demo/beaurette-demo-2026-11-04.gif)](docs/demo/beaurette-demo-2026-11-04.mp4)
+
+README에서 바로 움직이는 **4배속·무음 미리보기**입니다. **[전체 시연 영상 보기·다운로드 (MP4 · 3분 52초 · 원래 속도)](docs/demo/beaurette-demo-2026-11-04.mp4)**
 
 ## 서비스 화면
 
