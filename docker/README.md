@@ -1,5 +1,7 @@
 # AWS EC2 배포: FastAPI + Streamlit + 기존 Qdrant Cloud
 
+> **회원가입·로그인·RDS를 포함한 Django 배포는 [Django/RDS 배포 가이드](README.django.md)를 사용하세요.** 이 문서는 기존 Streamlit 배포를 유지·점검할 때 사용합니다. 두 화면의 계정과 저장 방식은 다릅니다.
+
 루트 `docker-compose.yml`이 기본 배포 설정입니다. EC2 한 대에 API와 화면을 실행하고, 기존 Qdrant Cloud 컬렉션을 그대로 조회합니다. RDS, 로컬 Qdrant, GPU는 이 구성에 필요하지 않습니다. 등록 제품과 대화는 현재처럼 Streamlit 세션에만 유지되므로 서버 재시작 후 복원되지 않습니다.
 
 ## 1. EC2 준비
@@ -7,7 +9,7 @@
 - Linux EC2에 Docker Engine과 Docker Compose 플러그인 **2.20.0 이상**을 설치합니다. 아래 명령은 Docker 실행 권한이 있는 계정 기준입니다.
 - 저장소를 EC2에 체크아웃하고 저장소 루트에서 실행합니다. 빌드에는 패키지 다운로드와 이미지 저장 공간이 필요합니다.
 - 초기 접속 확인용 보안 그룹: TCP **8501**을 본인/팀의 접속 IP에 허용합니다. SSH를 사용한다면 TCP **22**도 관리자의 IP에만 허용합니다.
-- API **8000**, Qdrant **6333**, DB **5432**는 외부에 열지 않습니다. API는 호스트 루프백에만 공개되고 화면은 Docker 내부 주소로 호출합니다.
+- API **8000**, Qdrant **6333**, DB **3306/5432**는 외부에 열지 않습니다. API는 호스트 루프백에만 공개되고 화면은 Docker 내부 주소로 호출합니다.
 - 서버에서 DNS 조회와 외부 HTTPS 연결이 가능해야 합니다. 런타임에는 OpenAI 및 Qdrant Cloud에, 빌드 시에는 컨테이너 레지스트리와 Python 패키지 저장소에 접근합니다. Qdrant 측 IP 제한을 사용한다면 EC2의 실제 송신 IP도 허용합니다.
 
 이 설정은 `8501` 포트의 HTTP 접속을 제공합니다. 도메인으로 공개 운영할 때는 HTTPS 프록시/ALB를 앞에 두고 Streamlit의 WebSocket 전달을 설정하세요. 여러 화면 인스턴스로 확장할 때는 세션 고정도 필요합니다.

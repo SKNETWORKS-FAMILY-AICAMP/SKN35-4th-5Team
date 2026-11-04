@@ -1,0 +1,16 @@
+{$SITE_ADDRESS:http://localhost} {
+	encode zstd gzip
+
+	handle_path /static/* {
+		root * /srv/static
+		file_server
+	}
+
+	handle {
+		reverse_proxy web:8001 {
+			transport http {
+				response_header_timeout 210s
+			}
+		}
+	}
+}
