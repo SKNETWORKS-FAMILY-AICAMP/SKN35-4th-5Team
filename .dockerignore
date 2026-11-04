@@ -24,3 +24,6 @@ __pycache__
 **/.pytest_cache
 **/.uv-cache
 data/02_processed/*.pkl
+
+# README demo media is not needed in deployment images.
+docs/demo/
