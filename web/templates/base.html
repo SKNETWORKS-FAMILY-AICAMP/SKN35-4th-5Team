@@ -4,28 +4,69 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}뷰렛{% endblock %} · Beaurette</title>
+  <link rel="icon" href="{% static 'brand/rabbit-avatar.webp' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
   {% block head %}{% endblock %}
 </head>
-<body>
-  <header class="nav">
-    <a class="brand" href="{% url 'core:home' %}">Beaurette</a>
-    {% if user.is_authenticated %}
-      <nav>
-        <a href="{% url 'products:list' %}">내 제품</a>
-        <a href="{% url 'reviews:create' %}">문구 검토</a>
-        <a href="{% url 'reviews:generate' %}">광고문 생성</a>
-        <a href="{% url 'chat:list' %}">챗봇</a>
-        <a href="{% url 'reviews:list' %}">이력</a>
-      </nav>
-      <form class="nav-user" method="post" action="{% url 'accounts:logout' %}">
-        {% csrf_token %}<span>{{ user.username }}</span><button type="submit" class="link">로그아웃</button>
-      </form>
-    {% else %}
-      <nav class="nav-user">
-        <a href="{% url 'accounts:login' %}">로그인</a>
-        <a href="{% url 'accounts:signup' %}">회원가입</a>
-      </nav>
+{# 로그인 후 화면 · 로그인 · 회원가입 공통 껍데기 — 첫 화면(core/landing_jarvis.html)과 같은 어두운 금빛 홀로그램 · 유리 #}
+{% with rm=request.resolver_match %}
+<body class="app {% if user.is_authenticated %}is-in{% else %}is-out{% endif %}">
+<div class="app-bg" aria-hidden="true">
+  <div class="app-bg-photo" style="background-image:url('{% static 'landing/editorial-amber.webp' %}')"></div>
+  <canvas class="app-particles"></canvas><div class="app-grid"></div><div class="app-vignette"></div>
+</div>
+
+{% if user.is_authenticated %}
+<aside class="rail" aria-label="메뉴">
+  <a class="rail-brand" href="{% url 'core:home' %}">
+    <img src="{% static 'brand/rabbit-avatar.webp' %}" alt="" width="36" height="36">
+    <span><b>Beaurette</b><small>AD REVIEW SYSTEM</small></span>
+  </a>
+  <nav class="rail-nav" data-rail>
+    <i class="rail-ind" aria-hidden="true"></i>
+    <p class="rail-group">Workspace</p>
+    <a href="{% url 'core:home' %}" {% if rm.app_name == 'core' and rm.url_name == 'home' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="2"/><rect x="14" y="3" width="7" height="5" rx="2"/><rect x="14" y="12" width="7" height="9" rx="2"/><rect x="3" y="16" width="7" height="5" rx="2"/></svg><span>대시보드</span></a>
+    <a href="{% url 'products:list' %}" {% if rm.app_name == 'products' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6v4l2 2v11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V9l2-2z"/><path d="M7 13h10"/></svg><span>내 제품</span></a>
+    <p class="rail-group">AI Lab</p>
+    <a href="{% url 'reviews:create' %}" {% if rm.app_name == 'reviews' and rm.url_name == 'create' or rm.app_name == 'reviews' and rm.url_name == 'detail' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>문구 검토</span></a>
+    <a href="{% url 'core:bulk' %}" {% if rm.url_name == 'bulk' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg><span>상세페이지 검토</span></a>
+    <a href="{% url 'reviews:generate' %}" {% if rm.url_name == 'generate' or rm.url_name == 'generation_detail' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg><span>광고문 생성</span></a>
+    <a href="{% url 'chat:list' %}" {% if rm.app_name == 'chat' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8M8 13h5"/></svg><span>통합 챗봇</span></a>
+    <p class="rail-group">Insight</p>
+    <a href="{% url 'core:library' %}" {% if rm.url_name == 'library' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4z"/><path d="M20 5h-6a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h6z"/></svg><span>규정 · 가이드라인</span></a>
+    <a href="{% url 'core:forecast' %}" {% if rm.url_name == 'forecast' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16"/><path d="M6 16l4-5 3 3 5-7"/><path d="M18 7h-3M18 7v3"/></svg><span>예상 매출 시나리오</span></a>
+    <p class="rail-group">History</p>
+    <a href="{% url 'reviews:list' %}" {% if rm.app_name == 'reviews' and rm.url_name == 'list' or rm.url_name == 'generation_list' %}aria-current="page"{% endif %}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><span>이력</span></a>
+  </nav>
+  <div class="rail-foot">
+    <p class="rail-sys"><i></i>SYSTEM ONLINE</p>
+    <div class="rail-me">
+      <span class="av">{{ user.username|first|upper }}</span>
+      <span class="who"><b>{{ user.username }}</b><small>워크스페이스 관리자</small></span>
+      <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="rail-out" aria-label="로그아웃" title="로그아웃"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></form>
+    </div>
+  </div>
+</aside>
+{% endif %}
+
+<div class="app-main">
+  <header class="app-top">
+    {% if not user.is_authenticated %}<a class="app-top-brand" href="{% url 'core:home' %}"><img src="{% static 'brand/rabbit-avatar.webp' %}" alt="" width="30" height="30"><b>Beaurette</b></a>{% endif %}
+    <p class="app-path mono">BEAURETTE <i>/</i> <b>{% block crumb %}{% if rm.app_name == 'products' %}내 제품{% elif rm.app_name == 'chat' %}챗봇{% elif rm.app_name == 'accounts' %}{% if rm.url_name == 'signup' %}회원가입{% else %}로그인{% endif %}{% elif rm.url_name == 'list' or rm.url_name == 'generation_list' %}이력{% elif rm.url_name == 'generate' or rm.url_name == 'generation_detail' %}광고문 생성{% elif rm.app_name == 'reviews' %}문구 검토{% elif rm.url_name == 'bulk' %}상세페이지 검토{% elif rm.url_name == 'library' %}규정 · 가이드라인{% elif rm.url_name == 'forecast' %}예상 매출 시나리오{% else %}대시보드{% endif %}{% endblock %}</b></p>
+    <p class="app-sys mono"><i></i><span data-clock></span></p>
+    {% if not user.is_authenticated %}
+      <a class="app-btn ghost" href="{% url 'accounts:login' %}">로그인</a>
+      <a class="app-btn" href="{% url 'accounts:signup' %}">회원가입</a>
     {% endif %}
   </header>
   <main class="container">
@@ -34,6 +75,9 @@
     {% endfor %}
     {% block content %}{% endblock %}
   </main>
-  {% block scripts %}{% endblock %}
+</div>
+<script src="{% static 'js/app-shell.js' %}"></script>
+{% block scripts %}{% endblock %}
 </body>
+{% endwith %}
 </html>

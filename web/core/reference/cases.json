@@ -1,0 +1,106 @@
+[
+ {
+  "date": "2026-07-24",
+  "title": "의약품 둔갑한 화장품 광고",
+  "full_title": "\"화장품이 질염 예방, 여드름 치료?\"… 의약품 둔갑한 화장품 광고 178건 적발 (식약처 보도참고자료, 2026.7.24)",
+  "count": 178,
+  "cosmetics_count": 178,
+  "scope": "화장품",
+  "breakdown": [
+   {
+    "label": "의약품 오인",
+    "pct": 80.0,
+    "count": 142
+   },
+   {
+    "label": "범위 이탈",
+    "pct": 12.0,
+    "count": 21
+   },
+   {
+    "label": "기능성 효능 상이",
+    "pct": 8.0,
+    "count": 15
+   }
+  ],
+  "source_url": "https://www.mfds.go.kr/brd/m_99/view.do?seq=50221",
+  "file": "data/01_raw/cases/case_2026-07-24_여드름치료_178건.txt"
+ },
+ {
+  "date": "2025-12-22",
+  "title": "탈모치료 효과 표방한 의료기기, 화장품 등 온라인 부당광고",
+  "full_title": "탈모치료 효과 표방한 의료기기, 화장품 등 온라인 부당광고 376건 적발",
+  "count": 376,
+  "cosmetics_count": 77,
+  "scope": "혼합",
+  "breakdown": [
+   {
+    "label": "의약품 오인",
+    "pct": 100.0,
+    "count": 77
+   }
+  ],
+  "source_url": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156736091",
+  "file": "data/01_raw/cases/case_2025-12-22_탈모치료_376건.txt"
+ },
+ {
+  "date": "2025-08-06",
+  "title": "\"피부재생\", \"염증완화\" 등 화장품 부당광고",
+  "full_title": "\"피부재생\", \"염증완화\" 등 화장품 부당광고 적발 (83건)",
+  "count": 83,
+  "cosmetics_count": 83,
+  "scope": "화장품",
+  "breakdown": [
+   {
+    "label": "의약품 오인",
+    "pct": 64.0,
+    "count": 53
+   },
+   {
+    "label": "범위 이탈",
+    "pct": 30.0,
+    "count": 25
+   },
+   {
+    "label": "기능성 오인",
+    "pct": 6.0,
+    "count": 5
+   }
+  ],
+  "source_url": null,
+  "file": "data/01_raw/cases/case_2025-08-06_피부재생_염증완화.txt"
+ },
+ {
+  "date": "2025-06-20",
+  "title": "눈썹염색 등 기능성화장품 부당광고",
+  "full_title": "눈썹염색 등 기능성화장품 부당광고 66건 적발",
+  "count": 66,
+  "cosmetics_count": 66,
+  "scope": "화장품",
+  "breakdown": null,
+  "source_url": null,
+  "file": "data/01_raw/cases/case_2025-06-20_기능성_66건.txt"
+ },
+ {
+  "date": "2025-04-14",
+  "title": "'탈모 예방' 등 부당광고",
+  "full_title": "식약처, '탈모 예방' 등 부당광고 192건 적발 조치",
+  "count": 192,
+  "cosmetics_count": null,
+  "scope": "화장품 외",
+  "breakdown": null,
+  "source_url": "https://www.korea.kr/briefing/pressReleaseView.do?newsId=156683908",
+  "file": "data/01_raw/cases/case_2025-04-14_탈모예방_192건.txt"
+ },
+ {
+  "date": "2023-07-26",
+  "title": "다이어트·식욕 억제 등 온라인 허위·과대 광고",
+  "full_title": "식약처, 다이어트·식욕 억제 등 온라인 허위·과대 광고 312건 적발",
+  "count": 312,
+  "cosmetics_count": 55,
+  "scope": "혼합",
+  "breakdown": null,
+  "source_url": "https://www.korea.kr/news/policyNewsView.do?newsId=148918165",
+  "file": "data/01_raw/cases/case_2023-07-26_허위과대_312건.txt"
+ }
+]

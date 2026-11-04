@@ -1,0 +1,11 @@
+{
+ "laws": 5,
+ "law_kinds": {
+  "고시": 3,
+  "법령": 2
+ },
+ "guidelines": 1,
+ "cases": 6,
+ "ingredients": 21945,
+ "fetched_at": "2026-10-12T10:23:41"
+}

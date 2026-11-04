@@ -1,0 +1,260 @@
+/* 3차 원본 홈 → 좌우로 넘기는 8장 · 자비스 HUD · 어두운 유리 (B안: 어둠 + 호박 · 금빛 홀로그램).
+   원본 base.css · home.css 를 먼저 읽고, 여기서는 ① 원본 색 토큰을 어둡게 바꾸고 ② 가로 화면 배치와 HUD 를 얹는다.
+   원본 마크업 · 문구 · 사진은 그대로다. */
+
+/* ── ① 원본 토큰 → 어두운 홀로그램 ─────────────────────────── */
+.jv {
+  --bw-bg: #0B0907;
+  --bw-surface: rgba(255, 238, 205, .07);
+  --bw-surface-2: rgba(255, 238, 205, .045);
+  --bw-subtle: rgba(255, 238, 205, .06);
+  --bw-line: rgba(233, 185, 110, .2);
+  --bw-line-strong: rgba(233, 185, 110, .38);
+  --bw-ink: #F6EEE1;
+  --bw-ink-2: rgba(246, 238, 225, .82);
+  --bw-muted: rgba(246, 238, 225, .64);
+  --bw-faint: rgba(246, 238, 225, .52);
+  --bw-accent: #E7AE55;
+  --bw-accent-hover: #F3C77F;
+  --bw-accent-deep: #B9822C;
+  --bw-accent-soft: rgba(231, 174, 85, .16);
+  --bw-accent-wash: rgba(231, 174, 85, .08);
+  --bw-accent-line: rgba(231, 174, 85, .42);
+  --bw-accent-text: #F4CC8C;
+  --bw-nav-on: rgba(231, 174, 85, .14);
+  --bw-pass: #8DDBAF; --bw-pass-soft: rgba(141, 219, 175, .14); --bw-pass-text: #A6E8C2;
+  --bw-risk: #FF9B83; --bw-risk-bg: rgba(255, 120, 90, .14); --bw-risk-line: rgba(255, 140, 110, .4); --bw-risk-under: #FF8D6E;
+  --bw-caution: #F4CB72; --bw-caution-bg: rgba(244, 203, 114, .14); --bw-caution-line: rgba(244, 203, 114, .4); --bw-caution-under: #E8B654;
+  --bw-hold: #D2CABE; --bw-hold-bg: rgba(210, 202, 190, .12); --bw-hold-line: rgba(210, 202, 190, .3);
+  --bw-shadow: none;
+  --h-sans: "Inter", "Noto Sans KR", "Pretendard Variable", "Malgun Gothic", sans-serif;
+  --h-gap: 24px;
+  --h-sec: 0px;
+
+  /* 홀로그램 */
+  --jv-gold: #E7AE55;
+  --jv-gold-hi: #FFE2AE;
+  --jv-glow: rgba(231, 174, 85, .55);
+  --jv-glow-soft: rgba(231, 174, 85, .18);
+  --jv-glass: linear-gradient(140deg, rgba(255, 236, 200, .11), rgba(255, 236, 200, .035) 60%);
+  --jv-glass-edge: rgba(255, 220, 160, .26);
+  --jv-glass-hi: inset 0 1px 0 rgba(255, 240, 210, .22), inset 0 0 0 1px rgba(255, 220, 160, .05);
+  --jv-shadow: 0 30px 80px -30px rgba(0, 0, 0, .85);
+  --jv-blur: blur(22px) saturate(150%);
+  --jv-night: #0B0907;
+  --jv-ease: cubic-bezier(.77, 0, .18, 1);
+}
+html:has(body.jv) { background: var(--jv-night); }
+body.jv { margin: 0; min-height: 100svh; background: var(--jv-night); color: var(--bw-ink); font-family: var(--h-sans); overflow: hidden; }
+.jv .bw { color: var(--bw-ink); }
+.jv a { color: inherit; }
+
+/* ── 배경: 장마다 원본 사진이 홀로그램처럼 깔린다 ───────────── */
+.jv-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.jv-bg-photo {
+  position: absolute; inset: -6%; background: center / cover no-repeat; opacity: 0;
+  filter: sepia(.35) saturate(1.2) brightness(.42) contrast(1.05); transform: scale(1.08);
+  transition: opacity 1.4s ease, transform 8s ease-out, background-image 0s;
+}
+.jv-bg-photo.on { opacity: 1; transform: scale(1); }
+.jv-particles { position: absolute; inset: 0; width: 100%; height: 100%; }
+.jv-grid {
+  position: absolute; left: -50%; right: -50%; bottom: -10%; height: 58%; opacity: .5;
+  background-image: linear-gradient(rgba(231, 174, 85, .22) 1px, transparent 1px), linear-gradient(90deg, rgba(231, 174, 85, .22) 1px, transparent 1px);
+  background-size: 64px 64px; transform: perspective(600px) rotateX(64deg); transform-origin: 50% 0;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 40%, transparent 95%); mask-image: linear-gradient(180deg, transparent, #000 40%, transparent 95%);
+  animation: jv-floor 14s linear infinite;
+}
+@keyframes jv-floor { to { background-position: 0 64px, 0 0; } }
+.jv-vignette { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 40%, transparent 40%, rgba(5, 4, 3, .85)), radial-gradient(60% 50% at 12% 10%, rgba(231, 174, 85, .14), transparent 70%); }
+.jv-scan { position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255, 226, 174, .0) 40%, rgba(255, 226, 174, .22) 49%, rgba(255, 246, 226, .5) 50%, rgba(255, 226, 174, .22) 51%, transparent 60%); transform: translateX(-100%); }
+.jv.is-moving .jv-scan { animation: jv-scan 1.1s var(--jv-ease); }
+@keyframes jv-scan { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+/* ── 상단 바 · HUD ───────────────────────────────────────── */
+.jv-top {
+  position: fixed; z-index: 30; top: 16px; left: 20px; right: 20px; height: 58px; display: flex; align-items: center; gap: 18px; padding: 0 12px 0 20px;
+  background: var(--jv-glass); -webkit-backdrop-filter: var(--jv-blur); backdrop-filter: var(--jv-blur);
+  border: 1px solid var(--jv-glass-edge); border-radius: 16px; box-shadow: var(--jv-shadow), var(--jv-glass-hi);
+}
+.jv-logo img { height: 26px !important; width: auto; filter: invert(1) sepia(.5) saturate(2) hue-rotate(-10deg) brightness(1.15); }
+.jv-sys { margin: 0 0 0 auto; display: flex; align-items: center; gap: 10px; font: 500 11px var(--bw-mono); letter-spacing: .16em; color: var(--bw-muted); }
+.jv-sys i { width: 7px; height: 7px; border-radius: 50%; background: var(--jv-gold); box-shadow: 0 0 0 0 var(--jv-glow); animation: jv-ping 1.8s infinite; }
+.jv-sys b { font-weight: 500; color: var(--jv-gold-hi); }
+@keyframes jv-ping { 70% { box-shadow: 0 0 0 9px transparent; } }
+
+.jv-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 12px; text-decoration: none;
+  font: 700 14.5px var(--h-sans); color: var(--jv-night); background: linear-gradient(135deg, var(--jv-gold-hi), var(--jv-gold) 50%, #B9822C);
+  box-shadow: 0 10px 30px -10px var(--jv-glow), inset 0 1px 0 rgba(255, 255, 255, .5); transition: transform .25s, box-shadow .3s;
+}
+.jv-btn:hover { transform: translateY(-1px); box-shadow: 0 14px 40px -10px var(--jv-glow), inset 0 1px 0 rgba(255, 255, 255, .5); }
+.jv-btn span { transition: translate .3s; } .jv-btn:hover span { translate: 3px 0; }
+.jv-btn.sm { height: 38px; padding: 0 14px; font-size: 13px; background: transparent; color: var(--bw-ink); border: 1px solid var(--jv-glass-edge); box-shadow: none; }
+.jv-btn.sm.solid { background: linear-gradient(135deg, var(--jv-gold-hi), var(--jv-gold) 50%, #B9822C); color: var(--jv-night); border: 0; }
+.jv-btn.ghost { background: rgba(255, 236, 200, .06); color: var(--jv-gold-hi); border: 1px solid var(--jv-glass-edge); box-shadow: var(--jv-glass-hi); }
+
+.jv-hud { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+.jv-hud .r1, .jv-hud .r2 { position: absolute; right: -14vh; top: 50%; width: 86vh; height: 86vh; margin-top: -43vh; border-radius: 50%; transition: opacity 1s, transform 1.2s var(--jv-ease); }
+.jv-hud .r1 { border: 1px dashed rgba(231, 174, 85, .28); animation: jv-spin 60s linear infinite; }
+.jv-hud .r2 { inset: auto; right: -4vh; width: 66vh; height: 66vh; margin-top: -33vh; top: 50%; border: 1px solid rgba(231, 174, 85, .14); border-top-color: rgba(255, 226, 174, .7); border-left-color: rgba(255, 226, 174, .35); animation: jv-spin 18s linear infinite reverse; }
+@keyframes jv-spin { to { rotate: 360deg; } }
+.jv[data-slide]:not([data-slide="0"]) .jv-hud .r1, .jv[data-slide]:not([data-slide="0"]) .jv-hud .r2 { opacity: .35; transform: scale(.7) translateX(30%); }
+.jv-read { position: absolute; bottom: 110px; margin: 0; font: 500 10.5px/1.7 var(--bw-mono); letter-spacing: .18em; color: var(--bw-faint); text-transform: uppercase; }
+.jv-read.l { left: 34px; } .jv-read.r { right: 34px; text-align: right; }
+
+/* ── ② 가로 덱 ───────────────────────────────────────────── */
+.jv-deck { position: fixed; inset: 0; z-index: 10; perspective: 1600px; outline: 0; }
+.jv-slide {
+  position: absolute; inset: 0; visibility: hidden; transform-style: preserve-3d;
+  transform: translateX(100%) rotateY(-18deg) scale(.86); opacity: 0; filter: blur(8px);
+  transition: transform 1.15s var(--jv-ease), opacity .9s ease, filter .9s ease, visibility 0s 1.15s;
+}
+.jv-slide.is-prev { transform: translateX(-100%) rotateY(18deg) scale(.86); }
+.jv-slide.is-on { visibility: visible; transform: none; opacity: 1; filter: none; transition: transform 1.15s var(--jv-ease), opacity .9s ease .1s, filter .9s ease .1s, visibility 0s; }
+.jv-body { position: absolute; inset: 96px 40px 104px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(231, 174, 85, .35) transparent; padding: 0 24px; }
+.jv-body > .bw { max-width: 1200px; margin: 0 auto; }
+.jv-slide:not(.is-hero) .jv-body > .bw { padding: 18px 0 24px; }
+
+/* 장 테두리: 모서리 괄호가 그려지며 켜진다 */
+.jv-frame { position: absolute; inset: 86px 26px 94px; pointer-events: none; }
+.jv-frame .c { position: absolute; width: 26px; height: 26px; border: 0 solid var(--jv-gold); opacity: .8; transform: scale(0); transition: transform .7s var(--jv-ease) .35s; filter: drop-shadow(0 0 6px var(--jv-glow)); }
+.jv-frame .tl { left: 0; top: 0; border-width: 1.5px 0 0 1.5px; transform-origin: 0 0; }
+.jv-frame .tr { right: 0; top: 0; border-width: 1.5px 1.5px 0 0; transform-origin: 100% 0; }
+.jv-frame .bl { left: 0; bottom: 0; border-width: 0 0 1.5px 1.5px; transform-origin: 0 100%; }
+.jv-frame .br { right: 0; bottom: 0; border-width: 0 1.5px 1.5px 0; transform-origin: 100% 100%; }
+.jv-slide.is-on .jv-frame .c { transform: scale(1); }
+
+/* 장 안 내용이 켜질 때: 한 번 번쩍이며 떠오른다 */
+.jv-slide.is-on .jv-body { animation: jv-boot .9s var(--jv-ease) both .15s; }
+@keyframes jv-boot { 0% { opacity: 0; clip-path: inset(48% 0 48% 0); } 40% { opacity: 1; } 100% { opacity: 1; clip-path: inset(0 0 0 0); } }
+
+/* ── 아래 넘기기 막대 ─────────────────────────────────────── */
+.jv-pager {
+  position: fixed; z-index: 30; left: 50%; bottom: 18px; translate: -50% 0; display: flex; align-items: center; gap: 6px; padding: 7px;
+  background: var(--jv-glass); -webkit-backdrop-filter: var(--jv-blur); backdrop-filter: var(--jv-blur);
+  border: 1px solid var(--jv-glass-edge); border-radius: 18px; box-shadow: var(--jv-shadow), var(--jv-glass-hi); max-width: calc(100vw - 32px);
+}
+.jv-steps { display: flex; gap: 2px; }
+.jv-steps button {
+  position: relative; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 0; border-radius: 12px; background: none; cursor: pointer;
+  font: 600 12.5px var(--h-sans); color: var(--bw-muted); white-space: nowrap; transition: background .3s, color .3s;
+}
+.jv-steps button .n { font: 500 10.5px var(--bw-mono); color: var(--bw-faint); }
+.jv-steps button span { max-width: 0; overflow: hidden; transition: max-width .5s var(--jv-ease); }
+.jv-steps button:hover { color: var(--bw-ink); background: rgba(255, 236, 200, .06); }
+.jv-steps button[aria-current] { color: var(--jv-night); background: linear-gradient(135deg, var(--jv-gold-hi), var(--jv-gold)); box-shadow: 0 6px 20px -8px var(--jv-glow); }
+.jv-steps button[aria-current] .n { color: var(--jv-night); }
+.jv-steps button[aria-current] span, .jv-steps button:hover span { max-width: 140px; }
+.jv-arrow { width: 40px; height: 40px; border: 1px solid var(--jv-glass-edge); border-radius: 12px; background: rgba(255, 236, 200, .05); color: var(--jv-gold-hi); font-size: 16px; cursor: pointer; }
+.jv-arrow:disabled { opacity: .3; cursor: default; }
+.jv-count { margin: 0 8px; font-size: 12px; color: var(--bw-faint); letter-spacing: .08em; }
+.jv-count b { color: var(--jv-gold-hi); font-weight: 500; }
+.jv-chat { position: fixed; z-index: 30; left: 22px; bottom: 22px; width: 54px; height: 54px; border-radius: 50%; overflow: hidden; border: 1px solid var(--jv-glass-edge); box-shadow: 0 0 0 6px rgba(231, 174, 85, .08), 0 0 30px var(--jv-glow-soft); background: #F6F3EC; }
+.jv-chat img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── ③ 원본 블록을 홀로그램 유리로 ─────────────────────────── */
+/* 1장 히어로: 왼쪽 글, 오른쪽 원본 화보를 유리창 안에 */
+.jv .jv-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 40px; align-items: center; min-height: calc(100% - 118px); max-width: 1320px; margin: 0 auto; padding: 0; clip-path: none; isolation: isolate; }
+.jv .jv-hero-copy { position: relative; z-index: 2; }
+.jv .jv-hero .bw-h-scene {
+  position: relative; inset: auto; grid-column: 2; grid-row: 1; height: min(64vh, 600px); border-radius: 24px; overflow: hidden;
+  border: 1px solid var(--jv-glass-edge); box-shadow: 0 0 0 8px rgba(255, 236, 200, .03), 0 40px 120px -30px rgba(231, 174, 85, .35), var(--jv-glass-hi);
+}
+.jv .jv-hero .bw-h-scene::after { content: ""; position: absolute; inset: 0; z-index: 6; height: auto; pointer-events: none;
+  background: repeating-linear-gradient(180deg, rgba(255, 236, 200, .05) 0 1px, transparent 1px 4px), linear-gradient(180deg, transparent 60%, rgba(11, 9, 7, .45)); }
+.jv .jv-hero .bw-h-scene .ph { left: 50%; top: 0; bottom: 0; translate: calc(-60% + var(--mx, 0) * -14px) calc(var(--my, 0) * -10px); -webkit-mask-image: none; mask-image: none; }
+.jv .jv-hero-copy .bw-h-hero h1 { font-size: clamp(40px, 4.4vw, 70px); color: var(--bw-ink); text-shadow: 0 0 40px rgba(231, 174, 85, .18); }
+.jv .bw-h-display em { color: var(--jv-gold); background-image: linear-gradient(rgba(231, 174, 85, .28), rgba(231, 174, 85, .28)); }
+.jv .bw-h-pill { background: rgba(255, 236, 200, .07); border: 1px solid var(--jv-glass-edge); color: var(--jv-gold-hi); }
+.jv .bw .bw-h-hero p { color: var(--bw-ink-2); }
+.jv .jv-cta { display: flex; gap: 10px; align-items: center; margin-top: 30px; flex-wrap: wrap; }
+.jv .bw-h-ghost { display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border: 1px solid var(--jv-glass-edge); border-radius: 12px; color: var(--bw-ink); text-decoration: none; font-weight: 600; background: rgba(255, 236, 200, .05); }
+.jv .bw-h-ghost:hover { background: rgba(255, 236, 200, .1); color: var(--bw-ink); border-color: var(--jv-gold); }
+.jv .bw .bw-h-meta { margin-top: 26px; }
+.jv .bw-h-meta li { color: var(--bw-muted); border-color: var(--bw-line); }
+.jv .bw-h-meta b { color: var(--jv-gold-hi); }
+
+/* 유리 패널: 교정 중 · 검토 카드 · 기능 카드 · 근거 문서 · 숫자 칸 */
+.jv .bw-h-proof, .jv .bw-h-demo .card, .jv .bw-h-feat, .jv .bw-h-docs > *, .jv .bw-h-stats li, .jv .bw-h-how-step, .jv .bw-h-fc-side, .jv .bw-h-skin-grid .chip {
+  background: var(--jv-glass); -webkit-backdrop-filter: var(--jv-blur); backdrop-filter: var(--jv-blur);
+  border: 1px solid var(--jv-glass-edge); box-shadow: var(--jv-shadow), var(--jv-glass-hi);
+}
+.jv .bw-h-proof { margin-top: 26px; padding: 16px 20px 18px; border-radius: 18px; border-top: 1px solid var(--jv-glass-edge); }
+.jv .bw .bw-h-proof .quote, .jv .bw .bw-h-demo .quote { color: var(--bw-ink); }
+.jv .bw-h-demo .card { border-radius: 20px; overflow: hidden; }
+.jv .bw-h-demo .bar, .jv .bw-h-demo .foot { background: rgba(255, 236, 200, .04); border-color: var(--bw-line); }
+.jv .bw-h-demo { margin-top: 36px; }
+.jv .bw-h-demo .say { background: rgba(20, 16, 11, .85); color: var(--bw-ink); border: 1px solid var(--jv-glass-edge); }
+.jv .bw-h-demo .say::after { border-top-color: rgba(20, 16, 11, .85); }
+.jv .bw-h-sh .ey, .jv .bw-h-sh .ey .no { color: var(--jv-gold); }
+.jv .bw-h-sh .ey .no { border-color: var(--jv-gold); }
+
+/* 밝은 종이 위에 쓰던 원본 그림자 · 면을 어둡게 */
+.jv .bw-h-band-type, .jv .bw-h-ticker { border-color: var(--bw-line); }
+.jv .bw-h-band-type s { color: var(--bw-muted); }
+.jv .jv-band { max-width: 1200px; margin: 28px auto 0; overflow: hidden; border-radius: 18px; }
+.jv .jv-band .bw-h-band-type { margin: 0; padding: 18px 0 12px; border: 1px solid var(--jv-glass-edge); border-radius: 18px; background: var(--jv-glass); -webkit-backdrop-filter: var(--jv-blur); backdrop-filter: var(--jv-blur); }
+/* 섹션 안 사진 띠는 그 장의 배경 사진으로 올린다 (같은 원본 사진) */
+.jv .jv-slide .bw-h-photo { display: none; }
+.jv-bg-photo.on.is-clear { filter: sepia(.15) saturate(1.1) brightness(.6); }
+/* 피부 사진 3장이 한 화면에 들어오게 */
+.jv .bw-h-skin-grid { --pic: min(52vh, 500px); }
+.jv .bw .bw-h-skin-grid .f1 .bw-h-pic { min-height: 0; height: var(--pic); }
+.jv .bw .bw-h-skin-grid .f2 .bw-h-pic, .jv .bw .bw-h-skin-grid .f3 .bw-h-pic { aspect-ratio: auto; height: calc((var(--pic) - var(--h-gap)) / 2); }
+.jv #s-demo .jv-body { padding-top: 40px; }
+.jv .bw .bw-h-ink { box-shadow: var(--jv-shadow), var(--jv-glass-hi); clip-path: none; }
+.jv .bw-h-ink .bw-h-sh { margin-top: 40px; }
+.jv .bw .bw-h-ink { background: rgba(8, 6, 4, .55); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid var(--jv-glass-edge); border-radius: 24px; margin: 0; padding: 48px; }
+.jv .bw-h-photo { margin: 24px 0 0; }
+.jv .bw-h-skin-grid figure, .jv .bw-h-pic { border-radius: 18px; }
+.jv .bw-h-skin-grid figure { border: 1px solid var(--jv-glass-edge); box-shadow: var(--jv-shadow); }
+.jv .bw .bw-h-skin-grid .chip { color: var(--bw-ink); }
+
+/* 사진 배경 장: 글자가 읽히게 한 겹 더 */
+.jv-slide.is-photo .jv-body > .bw { background: linear-gradient(180deg, rgba(11, 9, 7, .2), rgba(11, 9, 7, .5)); border-radius: 28px; padding: 32px 36px; }
+
+/* 화보 김 서림 · 빛줄기 (glass.js) */
+.bw-steam {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  -webkit-backdrop-filter: blur(20px) saturate(110%) brightness(1.1); backdrop-filter: blur(20px) saturate(110%) brightness(1.1);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .7) 0 1.1px, transparent 1.8px) 0 0 / 6px 8px,
+    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, .55) 0 1.6px, transparent 2.4px) 3px 2px / 11px 10px,
+    radial-gradient(circle at 40% 80%, rgba(255, 255, 255, .45) 0 2.6px, transparent 3.4px) 7px 5px / 29px 23px,
+    linear-gradient(180deg, rgba(255, 252, 247, .5), rgba(255, 250, 242, .34));
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  opacity: 0; transition: opacity 2.4s ease;
+}
+.bw-steam.on { opacity: 1; }
+.bw-steam-drops { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; }
+.bw-beam {
+  position: absolute; z-index: 5; left: -30%; top: 0; width: 22%; height: 100%; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, var(--jv-gold-hi) 50%, transparent 70%);
+  mix-blend-mode: soft-light; filter: blur(6px); opacity: 0; transform: skewX(-18deg); animation: bw-beam 11s cubic-bezier(.6, 0, .3, 1) 1.8s infinite;
+}
+@keyframes bw-beam { 0% { left: -30%; opacity: 0; } 6% { opacity: 1; } 22% { left: 115%; opacity: .9; } 24%, 100% { left: 115%; opacity: 0; } }
+
+/* 원본 커서(세럼 스포이드) 그대로 */
+.jv, .jv * { cursor: url("/static/brand/cursor-serum.png") 2 2, auto; cursor: -webkit-image-set(url("/static/brand/cursor-serum.png") 1x, url("/static/brand/cursor-serum@2x.png") 2x) 2 2, auto; }
+.jv a, .jv a *, .jv button, .jv button * { cursor: url("/static/brand/cursor-serum-hot.png") 2 2, pointer; cursor: -webkit-image-set(url("/static/brand/cursor-serum-hot.png") 1x, url("/static/brand/cursor-serum-hot@2x.png") 2x) 2 2, pointer; }
+
+/* ── 좁은 화면: 가로 넘김 대신 세로로 쌓는다 ─────────────── */
+@media (max-width: 900px) {
+  body.jv { overflow: auto; }
+  .jv-deck, .jv-slide { position: relative; inset: auto; }
+  .jv-slide { visibility: visible; transform: none; opacity: 1; filter: none; min-height: auto; }
+  .jv-body { position: relative; inset: auto; overflow: visible; padding: 24px 16px; }
+  .jv-frame, .jv-hud, .jv-pager, .jv-sys { display: none; }
+  .jv-top { position: sticky; top: 8px; left: auto; right: auto; margin: 8px; }
+  .jv .jv-hero { grid-template-columns: 1fr; padding-top: 70px; }
+  .jv .jv-hero .bw-h-scene { grid-column: 1; grid-row: 1; height: 46vh; }
+  .jv .jv-band { position: relative; }
+  .jv .bw .bw-h-ink { padding: 28px 20px; }
+  .jv-slide.is-photo .jv-body > .bw { padding: 20px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jv-slide, .jv-slide.is-on { transition: opacity .3s; transform: none; filter: none; }
+  .jv-slide.is-on .jv-body { animation: none; }
+  .jv-grid, .jv-hud i { animation: none; }
+}

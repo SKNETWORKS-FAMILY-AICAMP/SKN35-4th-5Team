@@ -1,42 +1,75 @@
 {% extends "base.html" %}
+{% load product_tags %}
 {% block title %}내 제품{% endblock %}
 {% block content %}
+{% product_groups as groups %}
 <div class="page-head">
   <h1>내 제품</h1>
   <a class="btn" href="{% url 'products:create' %}">제품 등록</a>
 </div>
-<div class="grid">
-  {% for p in products %}
-    <a class="card card-link" href="{% url 'products:detail' p.pk %}">
-      <h2>{{ p.name }}</h2>
-      <p>{{ p.category }}{% if p.functional_type %} · {{ p.functional_type }}{% endif %}</p>
-      <small>보유 실증 {{ p.evidences.all|length }}건</small>
-    </a>
-  {% empty %}
-    <p>등록된 제품이 없습니다. 직접 등록하거나 아래 예시 제품을 불러와 바로 검토해 보세요.</p>
-  {% endfor %}
+<p class="lead">제품의 분류와 보유 실증 자료가 쓸 수 있는 표현의 상한을 정합니다. 유형별로 나눠 보고, 필요한 예시 제품은 불러와 바로 검토해 보세요.</p>
+
+{# 거르기: 유형 · 일반/기능성 (pd-filter.js) — 스크립트가 없으면 전부 보인다 #}
+<div class="pd-filter" data-pd-filter hidden>
+  <div class="seg" role="group" aria-label="제품 유형">
+    <button type="button" data-g="all" aria-pressed="true">전체</button>
+    {% for g in groups %}<button type="button" data-g="{{ g.key }}" aria-pressed="false">{{ g.label }}</button>{% endfor %}
+  </div>
+  <div class="seg sm" role="group" aria-label="분류">
+    <button type="button" data-c="all" aria-pressed="true">일반 + 기능성</button>
+    <button type="button" data-c="일반" aria-pressed="false">일반</button>
+    <button type="button" data-c="기능성" aria-pressed="false">기능성</button>
+  </div>
 </div>
 
-<section class="samples">
-  <h2>예시 제품 불러오기</h2>
-  <p><small>3차 시연에 쓰던 예시 제품입니다. 불러오면 내 제품으로 복사되어 자유롭게 수정할 수 있습니다.</small></p>
-  <table class="table">
-    <thead><tr><th>제품</th><th>분류</th><th>보유 실증</th><th></th></tr></thead>
-    <tbody>
-      {% for s in samples %}
-        <tr>
-          <td>{{ s.name }}{% if s.highlight %}<br><small>{{ s.highlight }}</small>{% endif %}</td>
-          <td>{{ s.category }}{% if s.functional_type %} · {{ s.functional_type }}{% endif %}</td>
-          <td>{{ s.evidence_count }}건</td>
-          <td>
+<section class="pd-sec" aria-labelledby="mine-h">
+  <h2 id="mine-h">등록한 제품 <small>{{ products|length }}개</small></h2>
+  {% if products %}
+    {% for g in groups %}
+      <div class="pd-group" data-group="{{ g.key }}">
+        <h3 class="pd-gh"><i class="pd-ico g-{{ g.key }}" aria-hidden="true"></i>{{ g.label }} <span class="pd-n" data-count></span></h3>
+        <div class="pd-grid">
+          {% for p in products %}{% if p|product_group == g.key %}
+          <a class="card card-link pd-card" href="{% url 'products:detail' p.pk %}" data-cat="{{ p.category }}">
+            <span class="pd-top"><span class="badge {% if p.category == '기능성' %}badge-1{% endif %}">{{ p.category }}</span>{% if p.form %}<span class="pd-form">{{ p.form }}</span>{% endif %}</span>
+            <b class="pd-name">{{ p.name }}</b>
+            <span class="pd-type">{{ p.functional_type|default:"일반 화장품" }}</span>
+            {% with n=p.evidences.all|length %}<span class="pd-ev"><i style="--n:{{ n }}"></i>보유 실증 {{ n }}건</span>{% endwith %}
+          </a>
+          {% endif %}{% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">등록된 제품이 없습니다. 직접 등록하거나 아래 예시 제품을 불러와 바로 검토해 보세요.</p>
+  {% endif %}
+</section>
+
+<section class="pd-sec samples" aria-labelledby="sample-h">
+  <h2 id="sample-h">예시 제품 불러오기 <small>{{ samples|length }}개 · 3차 시연 제품</small></h2>
+  <p class="lead sm">3차 시연에 쓰던 예시 제품입니다. 불러오면 내 제품으로 복사되어 자유롭게 수정할 수 있습니다.</p>
+  {% for g in groups %}
+    <div class="pd-group" data-group="{{ g.key }}">
+      <h3 class="pd-gh"><i class="pd-ico g-{{ g.key }}" aria-hidden="true"></i>{{ g.label }} <span class="pd-n" data-count></span></h3>
+      <div class="pd-grid">
+        {% for s in samples %}{% if s|product_group == g.key %}
+        <article class="card pd-card is-sample" data-cat="{{ s.category }}">
+          <span class="pd-top"><span class="badge {% if s.category == '기능성' %}badge-1{% endif %}">{{ s.category }}</span>{% if s.form %}<span class="pd-form">{{ s.form }}</span>{% endif %}</span>
+          <b class="pd-name">{{ s.name }}</b>
+          <span class="pd-type">{{ s.functional_type|default:"일반 화장품" }}</span>
+          {% if s.highlight %}<span class="pd-hl">{{ s.highlight }}</span>{% endif %}
+          <span class="pd-foot">
+            <span class="pd-ev"><i style="--n:{{ s.evidence_count }}"></i>보유 실증 {{ s.evidence_count }}건</span>
             <form method="post" action="{% url 'products:sample_add' s.product_id %}">
               {% csrf_token %}
-              <button type="submit" class="{% if s.added %}link{% else %}btn{% endif %}">{% if s.added %}불러옴 · 보기{% else %}불러오기{% endif %}</button>
+              <button type="submit" class="btn sm{% if s.added %} btn-secondary{% endif %}">{% if s.added %}불러옴 · 보기{% else %}불러오기{% endif %}</button>
             </form>
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          </span>
+        </article>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  {% endfor %}
 </section>
 {% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'js/pd-filter.js' %}"></script>{% endblock %}

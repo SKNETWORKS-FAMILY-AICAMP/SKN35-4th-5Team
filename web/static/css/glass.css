@@ -1,0 +1,105 @@
+/* 3차 원본 홈 위에 얹는 유리 효과. 원본 CSS(original.css)는 건드리지 않고 덮어쓰기만 한다.
+   glass.js 가 <html class="bw-glass"> 를 달 때만 켜진다 — 스크립트가 없으면 원본 그대로.
+   레퍼런스: 김 서린 샤워 유리를 손으로 닦는 화면(레퍼런스 2), 반투명 유리 패널 대시보드(code.xr Glassy Dashboard),
+   화면을 가로지르는 빛줄기(레퍼런스 1). */
+
+html.bw-glass {
+  --g-fill: rgba(255, 253, 248, .38);
+  --g-fill-hi: rgba(255, 253, 248, .62);
+  --g-edge: rgba(255, 255, 255, .72);
+  --g-edge-lo: rgba(255, 255, 255, .28);
+  --g-shadow: 0 24px 60px -28px rgba(60, 40, 12, .38), 0 2px 10px -4px rgba(60, 40, 12, .12);
+  --g-inner: inset 0 1px 0 rgba(255, 255, 255, .9), inset 0 -1px 0 rgba(255, 255, 255, .2);
+  --g-blur: blur(18px) saturate(165%);
+  --g-glint: rgba(255, 248, 230, .55);
+  --g-beam: rgba(255, 228, 170, .95);
+}
+
+/* ── 1. 김 서린 유리 (히어로 화보) ───────────────────────────── */
+.bw-steam {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  -webkit-backdrop-filter: blur(20px) saturate(110%) brightness(1.1); backdrop-filter: blur(20px) saturate(110%) brightness(1.1);
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, .7) 0 1.1px, transparent 1.8px) 0 0 / 6px 8px,
+    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, .55) 0 1.6px, transparent 2.4px) 3px 2px / 11px 10px,
+    radial-gradient(circle at 40% 80%, rgba(255, 255, 255, .45) 0 2.6px, transparent 3.4px) 7px 5px / 29px 23px,
+    linear-gradient(180deg, rgba(255, 252, 247, .52), rgba(255, 250, 242, .36));
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  opacity: 0; transition: opacity 2.4s ease;
+}
+.bw-steam.on { opacity: 1; }
+.bw-steam-drops { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; }
+
+/* ── 2. 화면을 가로지르는 빛줄기 ───────────────────────────── */
+.bw-beam {
+  position: absolute; z-index: 5; left: -30%; top: 0; width: 22%; height: 100%; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 236, 190, .0) 38%, var(--g-beam) 50%, rgba(255, 236, 190, .0) 62%, transparent 70%);
+  mix-blend-mode: soft-light; filter: blur(6px); opacity: 0; transform: skewX(-18deg);
+  animation: bw-beam 11s cubic-bezier(.6, 0, .3, 1) 1.8s infinite;
+}
+@keyframes bw-beam {
+  0% { left: -30%; opacity: 0; } 6% { opacity: 1; } 22% { left: 115%; opacity: .9; } 24%, 100% { left: 115%; opacity: 0; }
+}
+
+/* ── 3. 유리 패널 ─────────────────────────────────────────── */
+/* 상단 바: 서리 유리 */
+html.bw-glass .stApp .st-key-home_top { background: transparent; box-shadow: none; clip-path: none; isolation: isolate; }
+html.bw-glass .stApp .st-key-home_top::before {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -100vmax; right: -100vmax;
+  background: rgba(246, 243, 236, .58); -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
+  border-bottom: 1px solid var(--g-edge-lo); box-shadow: 0 1px 0 rgba(23, 32, 27, .05), inset 0 -1px 0 rgba(255, 255, 255, .55);
+}
+
+/* 히어로 '교정 중' 줄 → 화보 위에 뜬 유리 카드 */
+html.bw-glass .bw-h-proof {
+  position: relative; overflow: hidden; padding: 16px 22px 18px; border-top: 0; border-radius: 18px;
+  background: linear-gradient(135deg, var(--g-fill-hi), var(--g-fill));
+  -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
+  border: 1px solid var(--g-edge); box-shadow: var(--g-shadow), var(--g-inner);
+}
+
+/* 사진 위 글자 칩 · 사진 띠 설명 → 유리 */
+html.bw-glass .bw .bw-h-skin-grid .chip {
+  border-radius: 14px; background: linear-gradient(135deg, var(--g-fill-hi), var(--g-fill));
+  -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
+  border: 1px solid var(--g-edge); box-shadow: var(--g-shadow), var(--g-inner);
+}
+
+/* 실제 검토 장면 카드 · 기능 카드 → 종이 위 유리 (뒤에 번진 빛을 깐다) */
+html.bw-glass .bw-h-demo .card {
+  position: relative; border-radius: 18px; overflow: hidden;
+  background: linear-gradient(140deg, rgba(255, 254, 250, .82), rgba(255, 252, 245, .58));
+  -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
+  border: 1px solid var(--g-edge); box-shadow: var(--g-shadow), var(--g-inner);
+}
+html.bw-glass .bw-h-demo::before {
+  content: ""; position: absolute; z-index: -1; inset: 6% -4% 0 18%; pointer-events: none;
+  background: radial-gradient(closest-side at 30% 40%, rgba(233, 178, 92, .30), transparent 70%),
+              radial-gradient(closest-side at 75% 70%, rgba(161, 101, 11, .18), transparent 70%);
+  filter: blur(30px);
+}
+
+/* 유리 위 빛 — 패널마다 손가락을 따라 하이라이트가 움직인다 (glass.js 가 --gx --gy) */
+html.bw-glass .bw-h-proof::after, html.bw-glass .bw-h-demo .card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(380px circle at var(--gx, 30%) var(--gy, 0%), var(--g-glint), transparent 55%);
+  mix-blend-mode: soft-light; transition: background-position .2s;
+}
+/* 패널 위를 지나가는 빛줄기 */
+html.bw-glass .bw-h-proof::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -40%; width: 30%; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .75), transparent); transform: skewX(-20deg);
+  animation: bw-glint 7s ease-in-out 2.4s infinite;
+}
+@keyframes bw-glint { 0% { left: -40%; } 18%, 100% { left: 130%; } }
+
+/* 버튼: 유리 고스트 */
+html.bw-glass .stApp .bw-h-ghost {
+  background: rgba(255, 253, 248, .35); -webkit-backdrop-filter: blur(12px) saturate(150%); backdrop-filter: blur(12px) saturate(150%);
+  border-color: rgba(23, 32, 27, .55); box-shadow: var(--g-inner);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bw-beam, html.bw-glass .bw-h-proof::before { animation: none; display: none; }
+}

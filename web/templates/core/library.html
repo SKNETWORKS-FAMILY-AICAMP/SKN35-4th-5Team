@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load humanize_won %}
+{% block title %}규정 · 가이드라인{% endblock %}
+{% block content %}
+<div class="page-head"><h1>규정 · 가이드라인</h1></div>
+<p class="lead">검토 근거로 쓰는 법령 · 고시 · 관리지침 · 적발 사례를 찾아봅니다. 답변의 근거 번호도 여기 있는 원문에서 나옵니다.</p>
+<div class="kb">
+  <span><b>{{ stats.laws }}</b>종 법령 · 고시</span><span><b>{{ stats.guidelines }}</b>종 관리지침</span>
+  <span><b>{{ stats.cases }}</b>건 적발 사례</span><span><b>{{ stats.ingredients|comma }}</b>개 원료 성분</span>
+</div>
+<nav class="tabs" aria-label="자료 종류">
+  <a href="?tab=search" {% if tab == 'search' %}aria-current="page"{% endif %}>조항 검색</a>
+  <a href="?tab=banned" {% if tab == 'banned' %}aria-current="page"{% endif %}>금지 표현 사전</a>
+  <a href="?tab=cases" {% if tab == 'cases' %}aria-current="page"{% endif %}>적발 사례</a>
+</nav>
+
+{% if tab == 'search' %}
+<form method="get" class="card inline-form search">
+  <input type="hidden" name="tab" value="search">
+  <label class="sr-only" for="lib-q">규정 검색</label>
+  <input id="lib-q" type="search" name="q" value="{{ q }}" placeholder="찾고 싶은 표현이나 조항을 입력하세요 (예: 피부 재생, 실증자료)">
+  <select name="scope" aria-label="적용 범위">{% for s in scopes %}<option value="{{ s }}" {% if s == scope %}selected{% endif %}>{{ s }}</option>{% endfor %}</select>
+  <button type="submit" class="btn">검색</button>
+  <div class="quick">{% for s in quick %}<a href="?tab=search&q={{ s|urlencode }}">{{ s }}</a>{% endfor %}</div>
+</form>
+{% if q %}
+  <h2>‘{{ q }}’ 검색 결과 <small>{{ hits|length }}건 · 권위 높은 순 가중</small></h2>
+  {% for h in hits %}
+  <article class="card hit">
+    <p class="hit-h"><b>{{ h.source }}</b> <span>{{ h.article }}</span> <span class="badge">{{ h.authority_label }}</span>{% if h.effective_date %} <small>{{ h.effective_date }}</small>{% endif %}</p>
+    <p>{{ h.content|truncatechars:420 }}</p>
+    {% if h.id %}<p><small class="mono">{{ h.id }}</small></p>{% endif %}
+  </article>
+  {% empty %}
+  <p>일치하는 조항이 없습니다. 다른 표현으로 찾아보세요.</p>
+  {% endfor %}
+{% else %}
+  <p class="empty">검색어를 입력하면 법령 · 고시 · 관리지침 · 적발 사례에서 관련 조항을 찾아 근거로 보여 줍니다.</p>
+{% endif %}
+
+{% elif tab == 'banned' %}
+<form method="get" class="card inline-form search">
+  <input type="hidden" name="tab" value="banned">
+  <label class="sr-only" for="lib-f">금지 표현 거르기</label>
+  <input id="lib-f" type="search" name="f" value="{{ f }}" placeholder="표현으로 거르기 (예: 재생, 탈모, 여드름)">
+  <button type="submit" class="btn">거르기</button>
+</form>
+<h2>화장품 표시·광고 관리 지침 [별표 1] 금지 표현 <small>{{ rows|length }}개 · 식약처 2025-01-21</small></h2>
+<table class="table">
+  <thead><tr><th>구분</th><th>금지 표현</th><th>비고</th><th>쪽</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+      {% ifchanged r.category %}<tr class="grp"><td colspan="4">{{ r.category }}</td></tr>{% endifchanged %}
+      <tr><td></td><td><b>{{ r.text }}</b></td><td>{{ r.note|default:"" }}</td><td class="mono">{{ r.page }}</td></tr>
+    {% empty %}
+      <tr><td colspan="4">해당하는 금지 표현이 없습니다.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% elif tab == 'cases' %}
+<h2>식약처 부당광고 적발 사례 <small>{{ cases|length }}건 · 보도자료 원문 기준</small></h2>
+{% for c in cases %}
+<article class="card case">
+  <span class="case-d mono">{{ c.date }}</span>
+  <div>
+    <p class="case-t">{% if c.source_url %}<a href="{{ c.source_url }}" target="_blank" rel="noopener">{{ c.full_title|default:c.title }}</a>{% else %}{{ c.full_title|default:c.title }}{% endif %}</p>
+    <p class="case-b">{% for b in c.breakdown %}<span>{{ b.label }} <b>{{ b.pct|floatformat:0 }}%</b></span>{% endfor %}</p>
+  </div>
+  <div class="case-n"><b>{{ c.n }}건</b><span class="bar"><i style="width:{{ c.pct }}%"></i></span></div>
+</article>
+{% endfor %}
+{% endif %}
+{% endblock %}

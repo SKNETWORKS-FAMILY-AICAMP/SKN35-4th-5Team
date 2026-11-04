@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}상세페이지 검토{% endblock %}
+{% block content %}
+<div class="page-head"><h1>상세페이지 검토</h1></div>
+<p class="lead">긴 상세페이지 문구를 문장 단위로 나눠 검토합니다. 문장별 판정과 교정본을 한 번에 확인하세요.</p>
+{% if not user.products.exists %}
+  <p>먼저 <a href="{% url 'products:create' %}">제품을 등록</a>해 주세요. 제품의 분류와 실증 자료에 따라 판정이 달라집니다.</p>
+{% else %}
+<form method="post" class="card" data-loading="문장마다 규정 문서를 찾아 판정하는 중입니다… (문장 수에 따라 몇 분 걸릴 수 있어요)">
+  {% csrf_token %}
+  {% include "partials/form_fields.html" %}
+  <button type="submit" class="btn">문장별로 검토하기</button>
+</form>
+{% endif %}
+
+{% if rows %}
+<section class="card">
+  <div class="sum">
+    <b>{{ rows|length }}문장</b>
+    {% for label, n in counts.items %}<span class="badge badge-{% if label == '불가' %}2{% elif label == '조건부' %}1{% elif label == '가능' %}0{% else %}hold{% endif %}">{{ label }} {{ n }}</span>{% endfor %}
+  </div>
+  <ol class="sents">
+    {% for r in rows %}
+    <li class="sent lv-{{ r.level|default_if_none:'hold' }}">
+      <div class="sent-h">{% include "partials/verdict.html" with level=r.level label=r.label %}{% if r.violation and r.violation != "없음" %}<small>{{ r.violation }}</small>{% endif %}</div>
+      <p class="sent-t">{{ r.text }}</p>
+      {% if r.notes %}<p class="sent-n">{{ r.notes }}</p>{% endif %}
+      {% if r.candidates and r.level %}<p class="sent-fix"><span>수정 제안</span>{{ r.candidates.0 }}</p>{% endif %}
+      {% if r.citations %}<p class="sent-c">{% for c in r.citations %}<span>{{ c.source }} {{ c.article }}</span>{% endfor %}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+<section class="card">
+  <h2>교정본</h2>
+  <p><small>수정 필요 · 실증 필요 문장은 첫 번째 제안 문구로 바꿨습니다.</small></p>
+  <textarea class="corrected" rows="10" readonly>{{ corrected }}</textarea>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'js/loading.js' %}"></script>{% endblock %}
