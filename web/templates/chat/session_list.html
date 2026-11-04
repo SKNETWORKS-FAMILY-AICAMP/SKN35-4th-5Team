@@ -7,7 +7,11 @@
   <label for="chat-product">대화할 제품</label>
   <select id="chat-product" name="product">
     <option value="">선택 안 함 (일반 질문)</option>
-    {% for p in products %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
+    {% for group, options in product_groups %}
+      <optgroup label="{{ group }}">
+        {% for value, name in options %}<option value="{{ value }}">{{ name }}</option>{% endfor %}
+      </optgroup>
+    {% endfor %}
   </select>
   <button type="submit" class="btn">새 대화</button>
 </form>

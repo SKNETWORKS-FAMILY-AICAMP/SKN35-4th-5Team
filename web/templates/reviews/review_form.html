@@ -2,14 +2,11 @@
 {% block title %}문구 검토{% endblock %}
 {% block content %}
 <h1>광고 문구 검토</h1>
-{% if not user.products.exists %}
-  <p>먼저 <a href="{% url 'products:create' %}">제품을 등록</a>해 주세요. 제품의 분류와 실증 자료에 따라 판정이 달라집니다.</p>
-{% else %}
+<p class="lead">제품의 분류와 실증 자료에 따라 판정이 달라집니다. 내 제품이나 3차 예시 제품을 골라 바로 검토해 보세요.</p>
 <form method="post" class="card" data-loading="검토 중입니다… (최대 1분 정도 걸릴 수 있어요)">
   {% csrf_token %}
   {% include "partials/form_fields.html" %}
   <button type="submit" class="btn">검토하기</button>
 </form>
-{% endif %}
 {% endblock %}
 {% block scripts %}{% load static %}<script src="{% static 'js/loading.js' %}"></script>{% endblock %}

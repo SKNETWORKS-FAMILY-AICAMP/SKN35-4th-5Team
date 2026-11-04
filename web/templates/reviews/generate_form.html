@@ -2,14 +2,10 @@
 {% block title %}광고문 생성{% endblock %}
 {% block content %}
 <h1>광고문 생성</h1>
-{% if not user.products.exists %}
-  <p>먼저 <a href="{% url 'products:create' %}">제품을 등록</a>해 주세요.</p>
-{% else %}
 <form method="post" class="card" data-loading="광고문을 만들고 검증하는 중입니다… (1~2분 걸릴 수 있어요)">
   {% csrf_token %}
   {% include "partials/form_fields.html" %}
   <button type="submit" class="btn">생성하기</button>
 </form>
-{% endif %}
 {% endblock %}
 {% block scripts %}{% load static %}<script src="{% static 'js/loading.js' %}"></script>{% endblock %}

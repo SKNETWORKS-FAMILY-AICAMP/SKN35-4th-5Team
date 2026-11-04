@@ -2,12 +2,12 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from core import ai_client
-from products.models import Product
+from products.samples import product_choices, resolve_product_choice
 
 from .models import ChatMessage, ChatSession
 
@@ -16,9 +16,10 @@ MAX_MESSAGE_LENGTH = 5000
 
 @login_required
 def session_list(request):
+    # 첫 항목("제품을 선택하세요")은 빼고 '선택 안 함'을 템플릿에서 붙인다.
     return render(request, "chat/session_list.html", {
         "sessions": request.user.chat_sessions.select_related("product"),
-        "products": request.user.products.all(),
+        "product_groups": product_choices(request.user)[1:],
     })
 
 
@@ -26,8 +27,11 @@ def session_list(request):
 @require_POST
 def session_create(request):
     product = None
-    if product_id := request.POST.get("product"):
-        product = get_object_or_404(Product, pk=product_id, owner=request.user)
+    if choice := request.POST.get("product"):
+        # 예시 제품을 고르면 내 제품으로 복사한 뒤 대화를 연다.
+        product = resolve_product_choice(request.user, choice)
+        if product is None:
+            raise Http404("제품이 없습니다.")
     session = ChatSession.objects.create(user=request.user, product=product)
     return redirect("chat:room", pk=session.pk)
 

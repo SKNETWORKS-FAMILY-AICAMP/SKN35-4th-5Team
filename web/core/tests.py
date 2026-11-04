@@ -165,6 +165,32 @@ class ReviewTests(BaseTestCase):
         self.assertContains(response, "AI 서버에 연결하지 못했습니다.")
         self.assertFalse(ReviewRecord.objects.exists())
 
+    @mock.patch("core.ai_client.review", return_value=REVIEW_RESPONSE)
+    def test_review_with_sample_product_without_importing_first(self, review):
+        # 제품을 하나도 등록하지 않은 사용자도 예시 제품을 골라 바로 검토할 수 있다 (3차 화면과 같게).
+        newbie = User.objects.create_user("newbie", password="pw-12345678")
+        self.client.force_login(newbie)
+        page = self.client.get(reverse("reviews:create"))
+        self.assertNotContains(page, "먼저")
+        self.assertContains(page, 'value="sample:PROD_001"')
+
+        self.client.post(reverse("reviews:create"), {"product": "sample:PROD_001", "copy_text": "7일 만에 주름 개선"})
+        product = newbie.products.get(sample_id="PROD_001")
+        review.assert_called_once_with("7일 만에 주름 개선", product.to_product_card())
+        self.assertEqual(ReviewRecord.objects.get(user=newbie).product, product)
+
+        # 다시 고르면 복사본을 또 만들지 않고, 선택지에서는 '내 제품' 쪽으로 옮겨 간다.
+        self.client.post(reverse("reviews:create"), {"product": "sample:PROD_001", "copy_text": "두 번째"})
+        self.assertEqual(newbie.products.filter(sample_id="PROD_001").count(), 1)
+        page = self.client.get(reverse("reviews:create"))
+        self.assertNotContains(page, 'value="sample:PROD_001"')
+        self.assertContains(page, f'value="{product.pk}"')
+
+    def test_unknown_sample_choice_is_rejected(self):
+        response = self.client.post(reverse("reviews:create"), {"product": "sample:NOPE", "copy_text": "문구"})
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(ReviewRecord.objects.exists())
+
     def test_cannot_review_with_other_users_product(self):
         other = User.objects.create_user("other", password="pw-12345678")
         self.client.force_login(other)
@@ -224,6 +250,12 @@ class ChatTests(BaseTestCase):
     def test_send_rejects_empty_message(self):
         session = ChatSession.objects.create(user=self.user)
         self.assertEqual(self.send(session, "  ").status_code, 400)
+
+    def test_new_chat_with_sample_product(self):
+        response = self.client.post(reverse("chat:create"), {"product": "sample:SAMPLE_03"})
+        session = ChatSession.objects.get(user=self.user)
+        self.assertRedirects(response, reverse("chat:room", args=[session.pk]))
+        self.assertEqual(session.product.sample_id, "SAMPLE_03")
 
     def test_draft_product_card_without_product(self):
         session = ChatSession.objects.create(user=self.user)

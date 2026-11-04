@@ -3,15 +3,11 @@
 {% block content %}
 <div class="page-head"><h1>상세페이지 검토</h1></div>
 <p class="lead">긴 상세페이지 문구를 문장 단위로 나눠 검토합니다. 문장별 판정과 교정본을 한 번에 확인하세요.</p>
-{% if not user.products.exists %}
-  <p>먼저 <a href="{% url 'products:create' %}">제품을 등록</a>해 주세요. 제품의 분류와 실증 자료에 따라 판정이 달라집니다.</p>
-{% else %}
 <form method="post" class="card" data-loading="문장마다 규정 문서를 찾아 판정하는 중입니다… (문장 수에 따라 몇 분 걸릴 수 있어요)">
   {% csrf_token %}
   {% include "partials/form_fields.html" %}
   <button type="submit" class="btn">문장별로 검토하기</button>
 </form>
-{% endif %}
 
 {% if rows %}
 <section class="card">
