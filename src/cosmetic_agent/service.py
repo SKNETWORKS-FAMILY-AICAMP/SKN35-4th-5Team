@@ -1,0 +1,221 @@
+"""
+[service.py]
+FastAPI 및 Streamlit이 호출하는 단일 비즈니스 로직 진입점(Facade Service).
+"""
+import time
+from typing import Any
+from .domain.schemas import (
+    GenerateRequest,
+    GenerateResponse,
+    ProductCard,
+    ReviewResult,
+    ReviewResponse,
+    ExecutionTiming,
+)
+from .domain.rules import RuleEngine
+from .domain.verifier import CopyVerifier
+from .models.judge_factory import JudgeFactory
+from .models.copy_generator import CopyGenerator
+from .models.appeal_ranker import AppealRanker
+from .rag.vector_store import VectorStoreRetriever
+from .rag.sparse_bm25 import SparseBM25Retriever
+from .rag.hybrid import HybridRetriever
+from .rag.query_rewriter import QueryRewriter
+from .workflow.graph import build_ad_review_graph
+from .generation.graph import build_generation_graph
+from .common.config import PROJECT_ROOT, settings
+from .common.logger import get_logger
+
+logger = get_logger("ReviewService")
+
+
+BM25_TOKENIZER = "ko-char-ngram-v2+metadata-v1"  # indexing/05_build_indexes.py 가 저장하는 값과 같아야 한다
+
+
+def _bm25_is_current(path) -> bool:
+    """예전 토크나이저로 만든 pkl 을 조용히 쓰면 로컬과 배포 검색 결과가 달라진다."""
+    import pickle
+
+    try:
+        with open(path, "rb") as stream:
+            payload = pickle.load(stream)
+    except Exception:  # noqa: BLE001 - 깨진 파일은 다시 만든다
+        return False
+    return isinstance(payload, dict) and payload.get("tokenizer") == BM25_TOKENIZER
+
+
+def _ensure_bm25_index() -> None:
+    """BM25 인덱스(bm25_index.pkl)는 git 에 올리지 않는 생성 파일이다.
+    배포 환경처럼 파일이 없으면 저장소의 chunks.jsonl 로 한 번 만든다 (API 키 불필요, 수 초)."""
+    if settings.BM25_INDEX_PATH.exists() and _bm25_is_current(settings.BM25_INDEX_PATH):
+        return
+    import importlib.util
+    import sys
+
+    indexing_dir = PROJECT_ROOT / "indexing"
+    # 색인 스크립트가 같은 폴더의 metadata_enrichment 를 불러오므로 경로에 넣는다
+    if str(indexing_dir) not in sys.path:
+        sys.path.insert(0, str(indexing_dir))
+    builder_path = indexing_dir / "05_build_indexes.py"
+    spec = importlib.util.spec_from_file_location("build_indexes", builder_path)
+    builder = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(builder)
+    logger.info("BM25 인덱스가 없어 chunks.jsonl 로 생성합니다")
+    settings.BM25_INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
+    builder.build_bm25_index(builder.load_chunks(), settings.BM25_INDEX_PATH)
+
+
+class ReviewService:
+    def __init__(self):
+        logger.info("ReviewService 인스턴스 초기화 시작")
+        self.rule_engine = RuleEngine()
+        self.judge_model = JudgeFactory.create_judge(self.rule_engine)
+        self.rewriter = QueryRewriter()
+        self.verifier = CopyVerifier()
+
+        # RAG 검색기
+        self.dense_retriever = VectorStoreRetriever(
+            collection_name=settings.QDRANT_COLLECTION_NAME,
+            url=settings.QDRANT_URL,
+            qdrant_api_key=settings.QDRANT_API_KEY,
+            openai_api_key=settings.OPENAI_API_KEY,
+            openai_base_url=settings.OPENAI_BASE_URL,
+            embedding_model=settings.OPENAI_EMBEDDING_MODEL,
+        )
+        _ensure_bm25_index()
+        self.sparse_retriever = SparseBM25Retriever(index_path=settings.BM25_INDEX_PATH)
+        self.hybrid_retriever = HybridRetriever(
+            dense_retriever=self.dense_retriever,
+            sparse_retriever=self.sparse_retriever,
+        )
+
+        self.copy_generator = CopyGenerator()
+
+        # LangGraph 컴파일
+        self.graph = build_ad_review_graph(
+            rule_engine=self.rule_engine,
+            judge_model=self.judge_model,
+            rewriter=self.rewriter,
+            retriever=self.hybrid_retriever,
+            verifier=self.verifier,
+        )
+        self.generation_graph = build_generation_graph(
+            rule_engine=self.rule_engine,
+            rewriter=self.rewriter,
+            retriever=self.hybrid_retriever,
+            verifier=self.verifier,
+            generator=self.copy_generator,
+            reviewer=self.review_single,
+            ranker=AppealRanker(),
+        )
+        logger.info("ReviewService 초기화 완료 (그래프 재사용 준비 완료)")
+
+    def review_single(self, copy_text: str, product: ProductCard) -> ReviewResponse:
+        """단일 광고 문구 검토 실행."""
+        start_t = time.perf_counter()
+
+        initial_state = {
+            "copy_text": copy_text,
+            "product": product.model_dump(),
+            "owned_evidence": [e.model_dump() for e in product.owned_evidence],
+        }
+
+        # 그래프 실행
+        final_state = self.graph.invoke(initial_state)
+
+        total_ms = (time.perf_counter() - start_t) * 1000
+
+        # 결과 계약 모델 조립
+        status = final_state.get("status", "판단보류")
+        level = final_state.get("level") if status == "판정" else None
+        citation_rows = []
+        for document in final_state.get("documents", []):
+            metadata = document.metadata
+            authority = int(metadata.get("authority", 4))
+            if authority not in (1, 2, 3, 4):
+                authority = 4
+            citation_rows.append(
+                {
+                    "chunk_id": metadata.get("chunk_id") or metadata.get("id", ""),
+                    "source": metadata.get("source", ""),
+                    "article": metadata.get("article", ""),
+                    "authority": authority,
+                    "content_snippet": document.page_content[:300],
+                }
+            )
+
+        review_notes = final_state.get("review_notes") or ""
+        if any(e.source_kind == "public_brand_summary" for e in product.owned_evidence):
+            review_notes = (review_notes + "\n공식몰 공개 시험 요약 기반 시연 검토입니다. 원보고서·시험기관·수치 산식은 미확보이며 최종 광고 사용 전 확인이 필요합니다.").strip()
+
+        result = ReviewResult(
+            status=status,
+            level=level,
+            violation_type=final_state.get("violation_type", "없음"),
+            claim_type=final_state.get("claim_type"),
+            citations=citation_rows,
+            suggestion=final_state.get("suggestion"),
+            next_test=final_state.get("next_test"),
+            review_notes=review_notes or None,
+        )
+
+        return ReviewResponse(
+            request_id=f"REQ_{int(start_t*1000)}",
+            input_text=copy_text,
+            result=result,
+            timing=ExecutionTiming(retrieval_ms=0.0, llm_ms=0.0, total_ms=total_ms),
+            candidates=final_state.get("candidates", []),
+            rejected_notes=final_state.get("rejected_notes", []),
+            used_evidence=final_state.get("used_evidence", []),
+            candidate_details=final_state.get("candidate_details", []),
+            experiment=final_state.get("experiment", {}),
+        )
+
+    def review_bulk(self, full_text: str, product: ProductCard) -> list[ReviewResponse]:
+        """상세페이지 텍스트를 문장 단위로 분할하여 일괄 검토."""
+        # TODO (팀원 구현 영역):
+        # 1. kss 또는 정규식으로 문장 분리
+        # 2. self.graph.batch() 또는 반복문 호출
+        sentences = [s.strip() for s in full_text.split("\n") if s.strip()]
+        return [self.review_single(s, product) for s in sentences]
+
+    def generate_copy(self, request: GenerateRequest) -> GenerateResponse:
+        """선택된 제품·실증자료와 규정 근거 안에서 신규 광고 문구를 생성한다."""
+        start_t = time.perf_counter()
+        product = request.product.model_copy(deep=True)
+        if request.ingredients:
+            product.key_ingredients = list(dict.fromkeys([*product.key_ingredients, *request.ingredients]))
+        final_state = self.generation_graph.invoke({
+            "instruction": request.instruction,
+            "product": product.model_dump(),
+            "channel": request.channel,
+            "tone": request.tone,
+            "length": request.length,
+            "keywords": request.keywords,
+            "product_description": request.product_description,
+            "reference_copy": request.reference_copy,
+        })
+
+        citations = []
+        for document in final_state.get("documents", []):
+            metadata = document.metadata
+            authority = int(metadata.get("authority", 4))
+            citations.append({
+                "chunk_id": metadata.get("chunk_id") or metadata.get("id", ""),
+                "source": metadata.get("source", ""),
+                "article": metadata.get("article", ""),
+                "authority": authority if authority in (1, 2, 3, 4) else 4,
+                "content_snippet": document.page_content[:300],
+            })
+
+        return GenerateResponse(
+            request_id=f"GEN_{int(start_t * 1000)}",
+            status=final_state.get("status", "생성보류"),
+            product_id=request.product.product_id,
+            candidates=final_state.get("candidates", []),
+            citations=citations,
+            warnings=final_state.get("warnings", []),
+            market_references=final_state.get("market_references", []),
+            ingredient_profiles=final_state.get("ingredient_profiles", []),
+            timing=ExecutionTiming(total_ms=(time.perf_counter() - start_t) * 1000),
+        )
