@@ -1,16 +1,40 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from .forms import EvidenceFormSet, ProductForm
 from .models import Product
+from .samples import create_from_sample, get_sample, load_samples
 
 
 @login_required
 def product_list(request):
     products = request.user.products.prefetch_related("evidences")
-    return render(request, "products/product_list.html", {"products": products})
+    added = set(products.exclude(sample_id="").values_list("sample_id", flat=True))
+    samples = [
+        {**sample, "evidence_count": len(sample.get("owned_evidence") or []), "added": sample["product_id"] in added}
+        for sample in load_samples()
+    ]
+    return render(request, "products/product_list.html", {"products": products, "samples": samples})
+
+
+@login_required
+@require_POST
+def sample_add(request, sample_id):
+    """3차 예시 제품을 내 제품으로 복사한다. 이미 불러온 예시는 그 제품으로 이동한다."""
+    sample = get_sample(sample_id)
+    if sample is None:
+        raise Http404("예시 제품이 없습니다.")
+    existing = request.user.products.filter(sample_id=sample_id).first()
+    if existing:
+        messages.info(request, f"'{existing.name}'은(는) 이미 불러온 예시 제품입니다.")
+        return redirect("products:detail", pk=existing.pk)
+    product = create_from_sample(request.user, sample)
+    messages.success(request, f"예시 제품 '{product.name}'을(를) 내 제품에 추가했습니다.")
+    return redirect("products:detail", pk=product.pk)
 
 
 @login_required
