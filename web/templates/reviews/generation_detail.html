@@ -12,7 +12,8 @@
 </section>
 {% for c in record.candidates %}
   <section class="card candidate candidate-{{ c.status }}">
-    <h2><span class="badge">{{ c.status }}</span> {{ c.tier }}</h2>
+    <h2><span class="badge {% if c.status == '검토통과' %}badge-0{% else %}badge-1{% endif %}">{{ c.status }}</span> {{ c.tier }}</h2>
+    {% if c.status != '검토통과' %}<div class="alert alert-warning">후속 규정 검토를 통과하지 못한 초안입니다. 아래 사유를 확인한 뒤 사용하세요.</div>{% endif %}
     {% if c.headline %}<h3>{{ c.headline }}</h3>{% endif %}
     <p class="copy">{{ c.text }}</p>
     {% if c.supporting_copy %}<p>{{ c.supporting_copy }}</p>{% endif %}

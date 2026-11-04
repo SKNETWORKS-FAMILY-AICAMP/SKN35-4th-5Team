@@ -160,6 +160,36 @@ def test_failed_suggestion_verification_stops_after_two_retries():
     assert result["level"] == 1
     assert result["copy_retry"] == 2
     assert verifier.calls == 3
+    # 검증에 끝내 실패한 문구는 최종 응답에 노출하지 않는다.
+    assert result["suggestion"] is None
+    assert result["candidates"] == []
+    assert nodes.NO_VERIFIED_SUGGESTION_NOTE in result["review_notes"]
+
+
+class DetailedSuggester:
+    """제안기처럼 후보 3개와 후보별 검증 결과를 돌려준다 (가운데만 통과)."""
+
+    def suggest(self, **kwargs):
+        details = [
+            {"text": "강한 후보", "verified": False},
+            {"text": "균형 후보", "verified": True},
+            {"text": "안전 후보", "verified": False},
+        ]
+        return {"suggestion": "균형 후보", "candidates": [d["text"] for d in details],
+                "candidate_details": details, "next_test": None}
+
+
+def test_rejected_candidates_are_removed_from_final_response(monkeypatch):
+    monkeypatch.setattr(nodes, "_default_suggester", DetailedSuggester())
+    document = Document(page_content="실증 자료가 필요하다.", metadata={"id": "LAW_004"})
+    graph, _, _, _ = make_graph(level=2, documents=[document], verify_passed=True)
+
+    result = graph.invoke(initial_state())
+
+    assert result["suggestion"] == "균형 후보"
+    assert result["candidates"] == ["균형 후보"]
+    # 탈락 후보는 사유 확인용으로 candidate_details 에 남는다.
+    assert [d["verified"] for d in result["candidate_details"]] == [False, True, False]
 
 
 def test_verified_suggestion_finishes_without_retry():

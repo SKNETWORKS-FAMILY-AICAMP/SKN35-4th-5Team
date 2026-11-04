@@ -33,7 +33,13 @@ def review_create(request):
 @login_required
 def review_detail(request, pk):
     record = get_object_or_404(ReviewRecord, pk=pk, user=request.user)
-    return render(request, "reviews/review_detail.html", {"record": record, "result": record.response.get("result", {})})
+    # AI 서버는 검증 탈락 후보를 candidates 에서 빼고 candidate_details 에만 사유와 함께 남긴다.
+    rejected = [d.get("verify_note") for d in record.response.get("candidate_details", []) if not d.get("verified") and d.get("verify_note")]
+    return render(request, "reviews/review_detail.html", {
+        "record": record,
+        "result": record.response.get("result", {}),
+        "rejected": list(dict.fromkeys(rejected)),
+    })
 
 
 @login_required

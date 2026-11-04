@@ -21,13 +21,17 @@
       const r = review.result;
       const label = r.status === "판정" ? LEVELS[r.level] : r.status;
       card.appendChild(el("span", `badge badge-${r.level ?? "hold"}`, label));
+      // AI 서버가 검증 통과 후보만 candidates 로 보낸다.
       (review.candidates || []).forEach((c) => card.appendChild(el("p", "copy", c)));
+      if (r.level >= 1 && !(review.candidates || []).length) {
+        card.appendChild(el("p", "loading", "검증을 통과한 수정안이 없어 제안 문구를 표시하지 않습니다."));
+      }
     }
     const generation = response.generation;
     if (generation) {
-      (generation.candidates || []).forEach((c) => {
+      (generation.candidates || []).filter((c) => c.status !== "제외").forEach((c) => {
         const item = el("p", "copy");
-        item.appendChild(el("span", "badge", c.status));
+        item.appendChild(el("span", `badge ${c.status === "검토통과" ? "badge-0" : "badge-1"}`, c.status));
         item.append(" " + c.text);
         card.appendChild(item);
       });

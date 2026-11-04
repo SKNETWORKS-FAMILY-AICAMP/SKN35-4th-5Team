@@ -27,6 +27,9 @@ class Product(models.Model):
     usage_step = models.CharField("사용 방법", max_length=200, blank=True)
     skin_type = models.CharField("추천 피부 타입", max_length=100, blank=True)
     highlight = models.CharField("한 줄 특징", max_length=200, blank=True)
+    # 3차 예시 제품(products/sample_products.json)에서 불러온 경우 그 product_id. 직접 등록하면 빈 값.
+    sample_id = models.CharField("예시 제품 ID", max_length=50, blank=True, editable=False)
+    source_note = models.TextField("자료 출처 안내", blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -57,12 +60,19 @@ class Product(models.Model):
 class Evidence(models.Model):
     """제품이 보유한 실증 자료(시험 결과). 판정 시 표현 가능한 상한을 정한다."""
 
+    class SourceKind(models.TextChoices):
+        PROVIDED_REPORT = "provided_report", "보유 시험 보고서"
+        PUBLIC_BRAND_SUMMARY = "public_brand_summary", "공식몰 공개 요약 (원보고서 미확보)"
+
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="evidences")
     test_type = models.CharField("시험 종류", max_length=100, help_text="예: 인체적용시험")
     item = models.CharField("시험 항목", max_length=200, help_text="예: 피부 겉보습 개선")
     value = models.CharField("결과 수치", max_length=100, blank=True, help_text="예: 4주 후 42% 개선")
     institute = models.CharField("시험 기관", max_length=100, blank=True)
     conditions = models.CharField("시험 조건", max_length=200, blank=True)
+    # AI 서버는 공개 요약 근거면 "원보고서 미확보" 안내를 판정 결과에 덧붙인다.
+    source_kind = models.CharField("자료 종류", max_length=30, choices=SourceKind.choices, default=SourceKind.PROVIDED_REPORT)
+    source_url = models.URLField("출처 URL", max_length=500, blank=True)
 
     def __str__(self):
         return f"{self.test_type} - {self.item}"
@@ -74,5 +84,6 @@ class Evidence(models.Model):
             "value": self.value or None,
             "institute": self.institute or None,
             "conditions": self.conditions or None,
-            "source_kind": "provided_report",
+            "source_kind": self.source_kind,
+            "source_url": self.source_url or None,
         }
