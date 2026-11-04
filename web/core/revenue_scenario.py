@@ -1,13 +1,11 @@
 """
 [web/core/revenue_scenario.py]
-3차 app/services/revenue_scenario.py 를 그대로 옮긴 것 (예상 매출 시나리오 계산).
-바꾼 곳 두 군데뿐이다:
-  - 자료 위치: data/sales_forecast_reference → web/core/reference (scripts/export_reference.py 가 복사)
+예상 매출 시나리오 계산.
+  - 자료 위치: web/core/reference (출처와 계산 기준은 data/sales_forecast_reference/README.md)
   - 위반 조항(law_ids)·수준(level)은 규칙 엔진 대신 AI 서버 /review 응답에서 받아 넘긴다 (Django 에는 엔진이 없다)
-원본이 바뀌면 이 파일도 같이 고친다.
 추천 문구 사용에 따른 예상 매출·판매량 시나리오와, 원문 유지 시 처분 위험 매출을 계산한다.
 
-설계 원칙 (data/sales_forecast_reference/FORECAST_DATA_PLAN.md)
+설계 원칙
 - 학습된 예측이 아니라 '가정 기반 시나리오'다. 모든 입력값에 출처 또는 '사용자 입력'을 붙인다.
 - 문구 효과(D5)는 방향을 모르는 '변화 폭'이다. 상승률이 아니므로 기준값 ± 범위로만 보여준다.
 - 문구 효과는 '문구가 노출되는 경로의 유입(클릭)'에만 적용한다. 구매전환율·객단가는 그대로 둔다.

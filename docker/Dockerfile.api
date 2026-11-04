@@ -15,7 +15,6 @@ ENV PYTHONUNBUFFERED=1 \
 # Both generation and retrieval read reference files directly from data/.
 # .dockerignore excludes local pickle indexes; always rebuild from tracked chunks.
 COPY --chown=appuser:appuser src ./src
-COPY --chown=appuser:appuser configs ./configs
 COPY --chown=appuser:appuser data ./data
 COPY --chown=appuser:appuser api ./api
 COPY --chown=appuser:appuser indexing/05_build_indexes.py indexing/metadata_enrichment.py ./indexing/

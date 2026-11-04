@@ -1,5 +1,5 @@
 """
-3차 Streamlit 앱의 예시 제품을 사용자 제품으로 복사한다.
+서비스에 포함된 예시 제품을 사용자 제품으로 복사한다.
 
 sample_products.json 은 저장소 루트 data/assets/ 의 mock_products.json(시연 시나리오 제품) +
 sample_products.json(제형·기능성 유형별 예시) + public_analysis_products.json(공개 분석 샘플)을

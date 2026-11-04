@@ -8,7 +8,7 @@ API는 광고 문구 검토와 신규 광고 문구 생성을 제공합니다.
 프로젝트 루트에서 실행합니다.
 
 ```powershell
-uv sync --extra dev
+uv sync --locked
 uv run uvicorn api.main:app --reload --port 8000
 ```
 
@@ -68,12 +68,6 @@ uv run uvicorn api.main:app --reload --port 8000
 `/generate`는 `생성완료` 또는 `생성보류`와 함께 검증을 통과한 후보만 반환합니다.
 후보에는 강도(`strong`, `balanced`, `safe`), 사용한 실증자료, 근거 ID와 검증 결과가 포함됩니다.
 
-## 테스트 및 현재 범위
+## 운영 연결 확인
 
-```powershell
-uv run pytest tests/integration/test_api.py -q
-```
-
-API 테스트는 외부 인프라 없이 테스트 서비스를 주입합니다.
-테스트 응답은 연결 확인용 `판단보류`이며 실제 법적 판정이 아닙니다.
-외부 인프라를 사용하는 실제 생성 검증에는 OpenAI 및 Qdrant Cloud 환경변수가 필요합니다.
+루트 `.env`에 OpenAI·Qdrant 설정을 입력한 뒤 `uv run python scripts/check_connections.py`로 연결을 확인합니다. 실제 API 호출에는 해당 외부 서비스가 필요합니다. HTTP 상태와 요청·응답 형식은 `/docs`에서 확인할 수 있습니다.

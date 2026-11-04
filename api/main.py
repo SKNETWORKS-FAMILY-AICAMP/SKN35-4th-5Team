@@ -20,7 +20,7 @@ logger = get_logger("API")
 
 
 def build_review_service():
-    # API 계약 테스트에서는 모델/검색 인프라를 로드하지 않습니다.
+    # 서버 수명주기 시작 시 모델과 검색 인프라를 초기화합니다.
     from cosmetic_agent.service import ReviewService
     return ReviewService()
 

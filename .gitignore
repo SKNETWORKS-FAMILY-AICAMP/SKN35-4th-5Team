@@ -11,18 +11,15 @@ build/
 # Local Environment Variables
 .env
 
-# Data & Model weights
+# Local source files & generated indexes
 data/01_raw/*.pdf
 data/01_raw/*.hwp
 data/02_processed/*.pkl
-finetune/adapters/*
-!finetune/adapters/.gitkeep
 
 # Testing & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
-output/eval/
 
 # IDE & OS
 .vscode/

@@ -1,6 +1,6 @@
 # EC2 배포: Django 로그인 + RDS MySQL 8.4 + 기존 AI API
 
-`docker-compose.web.yml`은 로그인 기능이 있는 `web/`을 배포합니다. 기존 `docker-compose.yml`의 Streamlit 화면과는 별도 진입점이며, 두 구성은 같은 `beaurette` 프로젝트의 API 서비스를 재사용합니다.
+`docker-compose.web.yml` 하나에서 `api`, `web`, `proxy`를 빌드·실행합니다. Compose 프로젝트 이름은 `beaurette`이며, Caddy 인증서 볼륨과 기존 운영 서비스 이름을 유지합니다.
 
 ```text
 브라우저 → Caddy(HTTPS·정적 파일) → Django/Gunicorn → RDS MySQL 8.4
@@ -128,7 +128,7 @@ curl --fail http://localhost/health/ready/
 
 `api`, `web`은 healthy, `proxy`는 실행 중이어야 합니다. `/health/ready/`는 DB 연결과 미적용 마이그레이션을 검사하며 실패하면 503을 반환합니다. 기존 `/health/`는 AI 상태 진단용이고, AI 오류를 HTTP 200 본문으로 보고하므로 readiness 대신 사용하지 않습니다.
 
-기존 Streamlit `app` 컨테이너가 남아 있으면 orphan 경고가 표시될 수 있습니다. 새 구성에 포함되지 않은 컨테이너가 있다는 안내이며, 공개 전 5단계에서 해당 서비스를 중지합니다.
+이전 배포의 컨테이너가 남아 있으면 orphan 경고가 표시될 수 있습니다. 공개 전 5단계의 `--remove-orphans`로 현재 구성에 없는 컨테이너를 정리합니다.
 
 **내 PC의 새 PowerShell 창**에서 SSH 터널을 엽니다. 키 경로와 EC2 IP는 본인 값으로 바꾸세요.
 
@@ -144,7 +144,7 @@ ssh -i "$ec2Key" -N -L 8080:127.0.0.1:80 ubuntu@16.184.19.224
 3. 제품을 등록하고 검토·챗봇 요청을 한 번 실행합니다. 실제 AI 호출에는 사용량 비용이 발생합니다.
 4. Django 컨테이너를 재시작한 후 다시 로그인하여 제품·이력이 남는지 확인합니다.
 
-다른 계정의 제품·이력이 보이지 않는지도 확인합니다. 기존 Streamlit의 세션 데이터나 로컬 SQLite 계정은 RDS로 자동 이전되지 않습니다.
+다른 계정의 제품·이력이 보이지 않는지도 확인합니다. 로컬 SQLite 계정은 RDS로 자동 이전되지 않습니다.
 
 ## 5. 도메인과 HTTPS로 공개
 
@@ -162,11 +162,10 @@ DJANGO_HTTPS=True
 
 `SITE_ADDRESS`는 하나의 실제 호스트명으로 설정합니다. Caddy가 인증서를 자동 발급·갱신하고 HTTP를 HTTPS로 리다이렉트합니다. Django도 HTTPS 리다이렉트와 Secure 쿠키를 적용합니다. 인증서는 `caddy_data` 볼륨에 보관되므로 재배포 때 볼륨을 삭제하지 않습니다.
 
-4. **공개 전 기존 로그인 없는 Streamlit 경로를 종료**합니다. 보안 그룹의 `8501` 인바운드 규칙도 제거합니다. 기존 Compose 파일로 다시 전체 `up`하면 Streamlit이 재시작되므로 운영에는 Django용 명령을 사용합니다.
+4. 현재 Compose 구성에 없는 이전 컨테이너를 정리하고 서비스를 실행합니다. 이전 배포에서 사용한 `8501` 인바운드 규칙이 남아 있으면 제거합니다.
 
 ```bash
-sudo docker compose stop app
-sudo docker compose --env-file web/.env -f docker-compose.web.yml up -d --wait --wait-timeout 180
+sudo docker compose --env-file web/.env -f docker-compose.web.yml up -d --remove-orphans --wait --wait-timeout 180
 sudo docker compose --env-file web/.env -f docker-compose.web.yml logs --tail=80 web proxy
 ```
 

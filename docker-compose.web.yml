@@ -1,12 +1,27 @@
-# Django deployment. The original docker-compose.yml remains the Streamlit entrypoint.
+# Django + FastAPI + Caddy deployment.
 # Use: docker compose --env-file web/.env -f docker-compose.web.yml ...
 name: beaurette
 
 services:
   api:
-    extends:
-      file: docker-compose.yml
-      service: api
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - .env
+    environment:
+      PROJECT_ROOT: /app
+      PROJECT_ROOT_PATH: /app
+      BM25_INDEX_PATH: /app/data/02_processed/bm25_index.pkl
+    init: true
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   web:
     build:

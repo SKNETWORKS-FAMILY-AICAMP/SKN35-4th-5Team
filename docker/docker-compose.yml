@@ -1,5 +1,0 @@
-# Compatibility entrypoint: use the root configuration and its relative paths.
-# Requires Docker Compose 2.20.0+.
-name: beaurette
-include:
-  - ../docker-compose.yml
