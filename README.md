@@ -52,11 +52,11 @@ Django 웹에서 제품과 실증 자료를 관리하고, FastAPI · LangGraph �
 | 팀원 | 작업 브랜치 | 담당 영역 | 관련 코드 및 반영 내역 |
 | --- | --- | --- | --- |
 | **김경민** | [`kgm`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/kgm) | AWS EC2 · RDS 배포, Docker Compose, Caddy · Gunicorn 운영 구성 | [`docker/`](docker/) · [`docker-compose.web.yml`](docker-compose.web.yml) · [Django/RDS 배포 구성](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/5035137) |
-| **권준호** | [`kjh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/kjh) | 8개 섹션의 홈 화면, 공통 UI · 제품 필터, 상세페이지 검토 · 규정 열람 · 매출 시나리오 | [`web/templates/`](web/templates/) · [`web/static/`](web/static/) · [홈·공통 UI·추가 기능 구현](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/f5fe547) |
+| **권준호** | [`kjh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/kjh) | 기본 화면의 HTML/Django 템플릿 전환·디자인 변형, 8개 섹션 홈·공통 UI·제품 필터, 상세페이지 검토·규정 열람·매출 시나리오 화면 구현 | [`web/templates/`](web/templates/) · [`web/static/`](web/static/) · [홈·공통 UI·추가 기능 구현](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/f5fe547) |
 | **이형민** | [`lhm`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/lhm) | Django 백엔드, 회원·제품·이력·대화 저장, AI 연동, 검증 실패 문구 차단, 예시 제품 불러오기 | [`web/`](web/) · [Django 웹 서비스 구현](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/4eb4d4a) · [검증 실패 문구 차단](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/b052390) · [예시 제품·실증 출처](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/commit/8c9fad1) |
-| **이세희** | [`lsh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/lsh) |  |  |
+| **이세희** | [`lsh`](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team/tree/lsh) | 기본 화면 제작, 프로젝트 발표 | 현재 웹 화면의 기반이 된 초기 화면 제작 · 프로젝트 발표 담당 |
 
-역할과 기여는 현재 저장소에 반영된 구현을 기준으로 정리했습니다. 공동 수정·통합된 기능은 주 기여 영역으로 표시했습니다.
+이세희가 제작한 기본 화면을 바탕으로 권준호가 HTML 전환과 화면 변형·확장을 진행했습니다. 공동 수정·통합된 기능은 주 기여 영역으로 표시했습니다.
 
 ---
 
