@@ -1,42 +1,5 @@
-﻿services:
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: cosmetic-qdrant
-    ports:
-      - "6333:6333"
-    volumes:
-      - qdrant_storage:/qdrant/storage
-    restart: unless-stopped
-
-  api:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.api
-    container_name: cosmetic-api
-    ports:
-      - "8000:8000"
-    environment:
-      - QDRANT_URL=http://qdrant:6333
-    env_file:
-      - .env
-    depends_on:
-      - qdrant
-    restart: unless-stopped
-
-  app:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.app
-    container_name: cosmetic-app
-    ports:
-      - "8501:8501"
-    environment:
-      - API_BASE_URL=http://api:8000
-    env_file:
-      - .env
-    depends_on:
-      - api
-    restart: unless-stopped
-
-volumes:
-  qdrant_storage:
+# Compatibility entrypoint: use the root configuration and its relative paths.
+# Requires Docker Compose 2.20.0+.
+name: beaurette
+include:
+  - ../docker-compose.yml
