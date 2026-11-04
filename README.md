@@ -6,6 +6,8 @@ SK Networks Family AI Camp 35기 · **4차 프로젝트 · 5팀**
 
 기존 RAG 에이전트를 FastAPI AI 서버로 활용하고, Django 웹 서비스와 AWS EC2 · RDS 배포 구성을 더했습니다.
 
+URL : https://beaurette.duckdns.org
+
 [팀 저장소](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN35-4th-5Team) · [Django 웹 가이드](web/README.md) · [AI API 가이드](api/README.md) · [AWS 배포 가이드](docker/README.django.md) · [4차 역할 분담 계획서](plan.md)
 
 <h2 align="center">🛠️ Tech Stack</h2>
