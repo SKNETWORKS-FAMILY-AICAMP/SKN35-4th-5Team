@@ -337,6 +337,10 @@ uv run streamlit run app/streamlit_app.py
 
 ### Docker / AWS EC2 실행
 
+**회원가입·로그인과 RDS를 포함한 배포**는 `docker-compose.web.yml`을 사용합니다. Django(`web/`) → FastAPI → 기존 Qdrant Cloud 구성이며, 회원·제품·검토·채팅 이력은 RDS MySQL에 저장합니다. Caddy가 정적 파일과 도메인 HTTPS를 제공합니다. [Django/RDS 배포 순서](docker/README.django.md)를 따라 환경변수, DB 마이그레이션, 로그인 확인, 도메인 연결 순서로 진행하세요.
+
+아래 명령은 **기존 Streamlit 화면**을 실행하는 경우입니다.
+
 루트 `docker-compose.yml`은 FastAPI와 Streamlit만 실행하고, `.env`에 지정한 **기존 Qdrant Cloud**에 연결합니다. RDS나 로컬 Qdrant 컨테이너는 만들지 않습니다. Docker Engine 및 Docker Compose 2.20.0 이상을 설치한 서버에서 실행하세요.
 
 ```bash

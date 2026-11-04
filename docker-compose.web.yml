@@ -1,0 +1,61 @@
+# Django deployment. The original docker-compose.yml remains the Streamlit entrypoint.
+# Use: docker compose --env-file web/.env -f docker-compose.web.yml ...
+name: beaurette
+
+services:
+  api:
+    extends:
+      file: docker-compose.yml
+      service: api
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+      target: web
+    env_file:
+      - web/.env
+    environment:
+      DJANGO_DEBUG: "False"
+      AI_API_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    # Gunicorn is reachable only inside Docker. Caddy is the public entrypoint.
+    expose:
+      - "8001"
+    init: true
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  proxy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+      target: proxy
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-http://localhost}
+    ports:
+      # Keep the first HTTP check private; change to 0.0.0.0 for domain/HTTPS launch.
+      - "${WEB_BIND_IP:-127.0.0.1}:80:80"
+      - "${WEB_BIND_IP:-127.0.0.1}:443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  caddy_data:
+  caddy_config:

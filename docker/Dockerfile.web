@@ -1,0 +1,39 @@
+FROM ghcr.io/astral-sh/uv:0.11.28 AS uv
+
+FROM python:3.12-slim AS web
+WORKDIR /app/web
+
+COPY --from=uv /uv /bin/uv
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_LINK_MODE=copy \
+    PATH="/app/web/.venv/bin:$PATH"
+
+COPY web/pyproject.toml web/uv.lock ./
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential pkg-config default-libmysqlclient-dev libmariadb3 \
+    && uv sync --locked --no-dev --no-install-project \
+    && apt-get purge -y --auto-remove build-essential pkg-config default-libmysqlclient-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 10001 appuser
+
+# Public AWS trust bundle, used to verify both the RDS certificate and endpoint.
+RUN mkdir -p /app/certs && chmod 755 /app/certs
+ADD --chmod=0644 https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /app/certs/rds-global-bundle.pem
+COPY --chown=appuser:appuser web ./
+RUN mkdir -p staticfiles && chown appuser:appuser staticfiles
+USER appuser
+
+# Build-time static collection needs neither credentials nor a database connection.
+RUN DJANGO_DEBUG=True DATABASE_URL=sqlite:///:memory: python manage.py collectstatic --noinput
+
+EXPOSE 8001
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health/ready/', timeout=8).close()"]
+
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8001", "--workers", "2", "--timeout", "200", "--access-logfile", "-", "--error-logfile", "-"]
+
+FROM caddy:2-alpine AS proxy
+COPY docker/Caddyfile /etc/caddy/Caddyfile
+COPY --from=web /app/web/staticfiles /srv/static
