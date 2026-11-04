@@ -16,18 +16,23 @@ load_dotenv(BASE_DIR / ".env")
 load_dotenv(BASE_DIR.parent / ".env")
 
 
+def env_str(name: str, default: str = "") -> str:
+    """.env.example 을 복사하면 `KEY=` 처럼 빈 값이 생기므로, 빈 값도 기본값으로 처리한다."""
+    return os.getenv(name, "").strip() or default
+
+
 def env_bool(name: str, default: bool = False) -> bool:
-    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+    return env_str(name, str(default)).lower() in {"1", "true", "yes", "on"}
 
 
 def env_list(name: str, default: str = "") -> list[str]:
-    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+    return [item.strip() for item in env_str(name, default).split(",") if item.strip()]
 
 
 DEBUG = env_bool("DJANGO_DEBUG", True)
 
 # 운영(DEBUG=False)에서는 반드시 환경변수로 지정한다.
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "")
+SECRET_KEY = env_str("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
     if not DEBUG:
         raise RuntimeError("DJANGO_SECRET_KEY 환경변수가 필요합니다.")
@@ -37,8 +42,8 @@ ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 # FastAPI AI 서버 주소. 로컬은 localhost:8000, docker-compose에서는 http://api:8000
-AI_API_URL = os.getenv("AI_API_URL", "http://localhost:8000").rstrip("/")
-AI_API_TIMEOUT = float(os.getenv("AI_API_TIMEOUT", "180"))
+AI_API_URL = env_str("AI_API_URL", "http://localhost:8000").rstrip("/")
+AI_API_TIMEOUT = float(env_str("AI_API_TIMEOUT", "180"))
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -84,9 +89,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # DATABASE_URL 예: postgres://user:pass@db:5432/beaurette (없으면 로컬 SQLite)
+# dj_database_url.config() 는 DATABASE_URL= (빈 값)이면 기본값 대신 {} 를 돌려주므로 직접 parse 한다.
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+    "default": dj_database_url.parse(
+        env_str("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
         conn_max_age=600,
     )
 }
