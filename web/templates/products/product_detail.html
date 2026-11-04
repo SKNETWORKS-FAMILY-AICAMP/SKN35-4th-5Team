@@ -26,8 +26,11 @@
 </section>
 <section class="card">
   <h2>보유 실증 자료</h2>
+  {% if product.source_note %}<div class="alert alert-warning">{{ product.source_note }}</div>{% endif %}
   {% for e in product.evidences.all %}
-    <p><strong>{{ e.test_type }}</strong> · {{ e.item }}{% if e.value %} · {{ e.value }}{% endif %}{% if e.institute %} <small>({{ e.institute }})</small>{% endif %}</p>
+    <p><strong>{{ e.test_type }}</strong> · {{ e.item }}{% if e.value %} · {{ e.value }}{% endif %}{% if e.institute %} <small>({{ e.institute }})</small>{% endif %}
+      {% if e.source_kind == "public_brand_summary" %}<span class="badge badge-1">{{ e.get_source_kind_display }}</span>{% endif %}
+      {% if e.source_url %}<br><small><a href="{{ e.source_url }}" target="_blank" rel="noopener">출처</a></small>{% endif %}</p>
   {% empty %}
     <p>등록된 실증 자료가 없습니다. 실증이 없으면 효능 표현은 대부분 조건부·불가로 판정됩니다.</p>
   {% endfor %}

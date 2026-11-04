@@ -79,6 +79,52 @@ class ProductTests(BaseTestCase):
         self.assertEqual(product.owner, self.user)
         self.assertEqual(product.evidences.count(), 1)
 
+    def test_samples_match_3rd_project_assets(self):
+        # 사본(web/products/sample_products.json)이 3차 원본과 같은 제품·순서인지 확인한다.
+        from pathlib import Path
+
+        from products.samples import load_samples
+
+        assets = Path(__file__).resolve().parents[2] / "data" / "assets"
+        if not assets.exists():
+            self.skipTest("저장소 루트 data/assets 가 없는 환경 (web 컨테이너)")
+        expected = []
+        for name in ("mock_products.json", "sample_products.json", "public_analysis_products.json"):
+            expected += json.loads((assets / name).read_text(encoding="utf-8"))
+        self.assertEqual(list(load_samples()), expected)
+
+    def test_add_sample_product_copies_card(self):
+        from products.samples import get_sample
+
+        sample = get_sample("PUBLIC_KIEHLS_UFC")
+        response = self.client.post(reverse("products:sample_add", args=["PUBLIC_KIEHLS_UFC"]))
+        product = self.user.products.get(sample_id="PUBLIC_KIEHLS_UFC")
+        self.assertRedirects(response, reverse("products:detail", args=[product.pk]))
+        card = product.to_product_card()
+        self.assertEqual(card["name"], sample["name"])
+        self.assertEqual(len(card["owned_evidence"]), len(sample["owned_evidence"]))
+        self.assertEqual({e["source_kind"] for e in card["owned_evidence"]}, {"public_brand_summary"})
+        self.assertTrue(product.source_note)
+
+        # 같은 예시를 다시 누르면 새로 만들지 않고 기존 제품으로 보낸다.
+        again = self.client.post(reverse("products:sample_add", args=["PUBLIC_KIEHLS_UFC"]))
+        self.assertRedirects(again, reverse("products:detail", args=[product.pk]))
+        self.assertEqual(self.user.products.filter(sample_id="PUBLIC_KIEHLS_UFC").count(), 1)
+
+    def test_every_sample_converts_to_valid_card(self):
+        from products.samples import create_from_sample, load_samples
+
+        for sample in load_samples():
+            with self.subTest(sample=sample["product_id"]):
+                card = create_from_sample(self.user, sample).to_product_card()
+                self.assertIn(card["category"], {"일반", "기능성"})
+                if card["category"] == "기능성":
+                    self.assertTrue(card["functional_type"])
+                self.assertEqual(card["key_ingredients"], sample.get("key_ingredients") or [])
+
+    def test_unknown_sample_is_404(self):
+        self.assertEqual(self.client.post(reverse("products:sample_add", args=["NOPE"])).status_code, 404)
+
     def test_other_users_product_is_hidden(self):
         other = User.objects.create_user("other", password="pw-12345678")
         self.client.force_login(other)
