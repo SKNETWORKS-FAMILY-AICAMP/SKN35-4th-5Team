@@ -258,3 +258,39 @@ body.jv { margin: 0; min-height: 100svh; background: var(--jv-night); color: var
   .jv-slide.is-on .jv-body { animation: none; }
   .jv-grid, .jv-hud i { animation: none; }
 }
+
+/* ── 가독성 (피드백 2026-11-05) — 첫 화면도 같은 기준: 배경 사진 어둡게 · 흐리게, 글 패널은 불투명, 보조 글자 밝게 ── */
+.jv {
+  --bw-ink-2: rgba(250, 244, 234, .92);
+  --bw-muted: rgba(246, 238, 225, .8);
+  --bw-faint: rgba(246, 238, 225, .66);
+  --jv-glass: linear-gradient(150deg, rgba(40, 31, 21, .88), rgba(22, 17, 11, .91));
+}
+.jv-bg-photo.on { filter: sepia(.3) saturate(.95) brightness(.26) blur(4px); }
+.jv-bg-photo.on.is-clear { filter: sepia(.2) saturate(1) brightness(.34) blur(3px); }
+.jv-particles { opacity: .45; }
+.jv-grid { opacity: .2; }
+.jv-slide.is-photo .jv-body > .bw { background: rgba(14, 11, 8, .8); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid var(--jv-glass-edge); }
+.jv .bw .bw-h-ink { background: rgba(14, 11, 8, .88); }
+.jv .bw-h-display { text-shadow: 0 2px 18px rgba(0, 0, 0, .55); }
+.jv .bw .bw-h-sh p, .jv .bw .bw-h-hero p { color: var(--bw-ink-2); }
+
+/* ── 글자 간격 (2026-11-05): 상단 · HUD 표시를 한글 본문 글꼴로, 영문 대문자만 간격 ── */
+.jv-sys { font-family: var(--h-sans); font-size: 12.5px; font-weight: 600; letter-spacing: 0; color: var(--bw-muted); }
+.jv-sys b { font-family: var(--bw-mono); letter-spacing: .02em; }
+.jv-read { font-family: var(--h-sans); font-size: 12px; letter-spacing: 0; text-transform: none; line-height: 1.6; color: var(--bw-faint); }
+.jv-steps button { letter-spacing: 0; }
+
+/* ── 스포이드 방울 되살리기 (2026-11-05) — orig-drip.js 가 첫 화면(body.jv)에서도 돈다 ── */
+body.jv, body.jv * {
+  cursor: url("/static/brand/cursor-serum.png") 2 2, auto;
+  cursor: -webkit-image-set(url("/static/brand/cursor-serum.png") 1x, url("/static/brand/cursor-serum@2x.png") 2x) 2 2, auto;
+}
+body.jv a, body.jv a *, body.jv button, body.jv button *, body.jv [role="button"] {
+  cursor: url("/static/brand/cursor-serum-hot.png") 2 2, pointer;
+  cursor: -webkit-image-set(url("/static/brand/cursor-serum-hot.png") 1x, url("/static/brand/cursor-serum-hot@2x.png") 2x) 2 2, pointer;
+}
+/* 어두운 화면이라 물결 테를 금빛으로 */
+body.jv .bw-ring::before { border-color: rgba(231, 174, 85, .75); }
+body.jv .bw-ring::after { border-color: rgba(255, 223, 166, .55); }
+body.jv .bw-dropl { filter: drop-shadow(0 0 4px rgba(255, 210, 140, .55)); }

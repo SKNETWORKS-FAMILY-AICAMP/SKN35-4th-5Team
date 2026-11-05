@@ -1,13 +1,25 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}로그인{% endblock %}
+{# 로그인 ↔ 회원가입: 두 화면 모두 켜야 화면 사이 전환(View Transition)이 돈다 — auth-slide.js · app.css '로그인 ↔ 회원가입 슬라이드' #}
+{% block head %}<style>@view-transition { navigation: auto; }</style>
+<script src="{% static 'js/auth-slide.js' %}" data-me="login"></script>{% endblock %}
 {% block content %}
-<section class="card narrow">
-  <h1>로그인</h1>
-  <form method="post">
-    {% csrf_token %}
-    {% include "partials/form_fields.html" %}
-    <button type="submit" class="btn">로그인</button>
-  </form>
-  <p>계정이 없나요? <a href="{% url 'accounts:signup' %}">회원가입</a></p>
+<section class="card narrow auth-card" data-auth="login">
+  <nav class="auth-tabs" aria-label="로그인 · 회원가입">
+    <i class="auth-pill" aria-hidden="true"></i>
+    <a href="{% url 'accounts:login' %}" data-auth-go="login"{% if "login" == "login" %} aria-current="page"{% endif %}>로그인</a>
+    <a href="{% url 'accounts:signup' %}" data-auth-go="signup"{% if "login" == "signup" %} aria-current="page"{% endif %}>회원가입</a>
+  </nav>
+  <i class="auth-scan" aria-hidden="true"></i>
+  <div class="auth-body">
+    <h1>로그인</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <button type="submit" class="btn">로그인</button>
+    </form>
+    <p>계정이 없나요? <a href="{% url 'accounts:signup' %}" data-auth-go="signup">회원가입</a></p>
+  </div>
 </section>
 {% endblock %}

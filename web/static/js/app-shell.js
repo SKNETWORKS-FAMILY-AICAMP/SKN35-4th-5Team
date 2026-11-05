@@ -22,6 +22,16 @@
     addEventListener("load", replace);
   }
 
+  // AI 서버 상태 (/health/) — 실제로 확인한 결과만 보여 준다
+  const st = document.querySelector("[data-health]");
+  if (st) {
+    fetch(st.dataset.health).then((r) => r.json()).then((d) => {
+      const ok = ["ok", "healthy"].includes(d.ai);
+      st.classList.toggle("is-bad", !ok);
+      st.querySelector("span").textContent = ok ? "AI 서버 연결됨" : "AI 서버 연결 안 됨";
+    }).catch(() => { st.classList.add("is-bad"); st.querySelector("span").textContent = "AI 서버 연결 안 됨"; });
+  }
+
   // 카드 위를 따라가는 빛
   document.addEventListener("pointermove", (e) => {
     const c = e.target.closest?.(".card");

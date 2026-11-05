@@ -29,7 +29,8 @@
   ].join(' ');
 
   var surfaces = [];
-  function onHome() { return !!document.querySelector('.st-key-home_top'); }
+  // 3차 원본 홈(.st-key-home_top) 또는 4차 첫 화면(body.jv · 자비스 8장)
+  function onHome() { return !!document.querySelector('.st-key-home_top, body.jv'); }
 
   function shader(gl, type, src) {
     var s = gl.createShader(type);

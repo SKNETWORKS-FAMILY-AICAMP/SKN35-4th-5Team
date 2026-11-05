@@ -336,8 +336,8 @@ body.app .fc-inputs .fc-form { margin-top: 16px; }
 .is-out .card.narrow h1::before { content: "ACCESS · BEAURETTE"; display: block; margin-bottom: 10px; font: 500 10.5px var(--mono); letter-spacing: .24em; color: var(--gold); }
 .is-out .card.narrow form { margin-top: 22px; }
 .is-out .card.narrow .btn { width: 100%; height: 48px; margin-top: 4px; }
-.is-out .card.narrow > p { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 13.5px; }
-.is-out .card.narrow > p a { font-weight: 650; }
+.is-out .auth-body > p, .is-out .card.narrow > p { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 13.5px; }
+.is-out .auth-body > p a, .is-out .card.narrow > p a { font-weight: 650; }
 .is-out .app-main { padding-bottom: 20px; }
 
 @media (max-width: 900px) {
@@ -460,3 +460,106 @@ body.app .chart { overflow: hidden; }
 .rail-ind { left: 4px; right: 4px; height: 38px; border-radius: 10px; box-shadow: 0 6px 18px -10px var(--glow), inset 0 1px 0 rgba(255, 255, 255, .5); }
 .rail-nav a[aria-current] { padding-left: 16px; }
 .rail-nav a.is-hover:not([aria-current])::after { inset: 0 4px; border-radius: 10px; }
+
+/* ── 가독성 (피드백 2026-11-05: 배경이 화려하고 어두워 글씨가 묻힘) ──────────
+   배경은 더 어둡고 흐리게 · 입자/격자는 약하게, 카드는 거의 불투명한 어두운 유리, 보조 글자는 더 밝게 */
+:root {
+  --ink-2: rgba(250, 244, 234, .92);
+  --muted: rgba(246, 238, 225, .78);
+  --faint: rgba(246, 238, 225, .62);
+  --glass: linear-gradient(150deg, rgba(40, 31, 21, .90), rgba(22, 17, 11, .93));
+  --glass-flat: rgba(30, 24, 16, .88);
+  --edge: rgba(255, 220, 160, .30);
+  --input: rgba(0, 0, 0, .45);
+}
+.app-bg-photo { filter: sepia(.3) saturate(.9) brightness(.2) blur(6px); }
+.app-particles { opacity: .4; }
+.app-grid { opacity: .12; }
+.app-vignette { background: linear-gradient(rgba(10, 8, 6, .35), rgba(10, 8, 6, .35)), radial-gradient(120% 90% at 55% 35%, transparent 35%, rgba(5, 4, 3, .92)); }
+.rail { background: linear-gradient(160deg, rgba(42, 33, 21, .94), rgba(18, 14, 9, .96)); }
+body.app h1, body.app h2, body.app h3 { color: var(--ink); text-shadow: 0 1px 2px rgba(0, 0, 0, .45); }
+body.app .lead, body.app .card p, body.app .sent-t, body.app .hit p:not(.hit-h) { color: var(--ink-2); }
+.kpi-s, .pd-hl, .case-b, .sent-n, .pd-form, .pd-ev { font-size: 13.5px; }
+.kpi.is-risk { background: linear-gradient(150deg, rgba(70, 28, 22, .92), rgba(26, 17, 12, .94)); }
+body.app .table td { color: var(--ink-2); }
+body.app .badge { font-weight: 700; }
+
+/* ── 글자 간격 · 폰트 최종 기준 (2026-11-05) — 위의 흩어진 값을 이 블록이 정리한다 ──────────
+   한글 본문 0 · 제목 -0.02em · 한글 라벨 0(본문 글꼴) · 대문자 영문 라벨만 고정폭 0.12em · 숫자 고정폭 -0.01em */
+body.app { letter-spacing: 0; line-height: 1.65; }
+body.app h1 { letter-spacing: -0.02em; line-height: 1.25; }
+body.app h2 { letter-spacing: -0.015em; line-height: 1.35; }
+body.app h3, .pd-name, .rail-brand b, body.app .app-top-brand b { letter-spacing: -0.01em; }
+body.app p, body.app li, body.app td, body.app blockquote, .kpi-s, .pd-hl, .sent-t, .sent-n { letter-spacing: 0; }
+body.app .card p, body.app .lead, .sent-t { line-height: 1.7; }
+/* 한글 라벨: 본문 글꼴 · 간격 없음 */
+.kpi-k, .fc-k, .sent-fix span, body.app .table th, body.app .field label, .app-path, .pd-gh, .rail-brand small, .rail-sys, .rail-me small {
+  font-family: var(--font); letter-spacing: 0; text-transform: none;
+}
+.rail-brand small { font-size: 11px; font-weight: 600; color: var(--gold); }
+.rail-sys { font-size: 12px; font-weight: 600; color: var(--muted); margin: 0 10px; }
+.rail-sys.is-bad i { background: var(--risk); animation: none; }
+/* 대문자 영문 라벨 (WORKSPACE · AI LAB …) */
+.rail-group, .is-out .card.narrow h1::before { font-family: var(--mono); letter-spacing: .12em; }
+/* 숫자 */
+.kpi-v, .fc-n, .case-n b, .kb b, .pd-n, .case-d, .law { letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.kpi-v small { letter-spacing: 0; }
+
+/* ── 로그인 ↔ 회원가입 슬라이드 (2026-11-05) ──
+   위 탭의 금빛 밑줄은 옆 탭으로 미끄러지고, 카드 본문은 옆으로 접히며 빠지고 반대편에서 들어온다.
+   들어온 카드 위로 금빛 스캔선이 한 번 지나가고, 입력칸이 차례로 떠오른다.
+   크롬 · 엣지 · 사파리: 화면 사이 전환(View Transition) / 그 밖: auth-slide.js 가 같은 움직임을 흉내 낸다 */
+.auth-card { view-transition-name: auth-card; }
+.auth-tabs { view-transition-name: auth-tabs; position: relative; display: grid; grid-template-columns: 1fr 1fr; margin: -8px -6px 26px; border-bottom: 1px solid var(--line); }
+.auth-tabs a { position: relative; z-index: 1; padding: 10px 0 13px; text-align: center; font-weight: 650; font-size: 14.5px; color: var(--muted); text-decoration: none; transition: color .3s; }
+.auth-tabs a:hover { color: var(--ink); }
+.auth-tabs a[aria-current] { color: var(--gold-hi); }
+.auth-pill { view-transition-name: auth-pill; position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-hi) 20%, #FFF1D2 50%, var(--gold-hi) 80%, transparent);
+  box-shadow: 0 0 12px 1px rgba(231, 174, 85, .75), 0 0 28px 4px rgba(231, 174, 85, .25); pointer-events: none; }
+.auth-card[data-auth="signup"] .auth-pill { left: 50%; }
+.auth-scan { position: absolute; inset: 0; z-index: 3; border-radius: inherit; overflow: hidden; pointer-events: none; opacity: 0; }
+.auth-scan::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 38%;
+  background: linear-gradient(90deg, transparent, rgba(231, 174, 85, .1) 40%, rgba(255, 228, 175, .55) 50%, rgba(231, 174, 85, .1) 60%, transparent);
+  mix-blend-mode: screen; }
+.auth-scan::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(255, 223, 166, .06) 0 1px, transparent 1px 4px); }
+
+/* 화면 사이 전환 */
+::view-transition-group(auth-card) { animation-duration: .8s; animation-timing-function: cubic-bezier(.16, 1, .3, 1); }
+::view-transition-group(auth-pill) { animation-duration: .7s; animation-timing-function: cubic-bezier(.34, 1.5, .5, 1); }
+::view-transition-old(auth-tabs), ::view-transition-new(auth-tabs) { animation-duration: .35s; }
+html:active-view-transition-type(auth-fwd)::view-transition-old(auth-card) { animation: auth-out-l .5s cubic-bezier(.6, 0, .8, .3) both; }
+html:active-view-transition-type(auth-fwd)::view-transition-new(auth-card) { animation: auth-in-r .8s cubic-bezier(.16, 1, .3, 1) .1s both; }
+html:active-view-transition-type(auth-back)::view-transition-old(auth-card) { animation: auth-out-r .5s cubic-bezier(.6, 0, .8, .3) both; }
+html:active-view-transition-type(auth-back)::view-transition-new(auth-card) { animation: auth-in-l .8s cubic-bezier(.16, 1, .3, 1) .1s both; }
+@keyframes auth-out-l { to { opacity: 0; transform: perspective(1000px) translateX(-42%) rotateY(24deg) scale(.9); filter: blur(10px) brightness(1.7); } }
+@keyframes auth-out-r { to { opacity: 0; transform: perspective(1000px) translateX(42%) rotateY(-24deg) scale(.9); filter: blur(10px) brightness(1.7); } }
+@keyframes auth-in-r { from { opacity: 0; transform: perspective(1000px) translateX(46%) rotateY(-26deg) scale(.92); filter: blur(12px) brightness(1.8); } }
+@keyframes auth-in-l { from { opacity: 0; transform: perspective(1000px) translateX(-46%) rotateY(26deg) scale(.92); filter: blur(12px) brightness(1.8); } }
+
+/* 들어온 카드: 스캔선 한 번 · 입력칸 차례로 */
+.auth-arrive .auth-scan { animation: auth-scan-o 1.1s ease .15s both; }
+.auth-arrive .auth-scan::before { animation: auth-sweep 1.1s cubic-bezier(.45, 0, .2, 1) .15s both; }
+.auth-arrive.auth-dir-back .auth-scan::before { animation-name: auth-sweep-back; }
+@keyframes auth-scan-o { 0%, 100% { opacity: 0; } 15%, 75% { opacity: 1; } }
+@keyframes auth-sweep { from { translate: -110% 0; } to { translate: 290% 0; } }
+@keyframes auth-sweep-back { from { translate: 290% 0; } to { translate: -110% 0; } }
+.auth-arrive .auth-body > *, .auth-arrive .auth-body form > * { animation: auth-rise .6s cubic-bezier(.16, 1, .3, 1) both; }
+.auth-arrive .auth-body > h1 { animation-delay: .18s; }
+.auth-arrive .auth-body form > :nth-child(2) { animation-delay: .26s; }
+.auth-arrive .auth-body form > :nth-child(3) { animation-delay: .32s; }
+.auth-arrive .auth-body form > :nth-child(4) { animation-delay: .38s; }
+.auth-arrive .auth-body form > :nth-child(5) { animation-delay: .44s; }
+.auth-arrive .auth-body form > :nth-child(n+6) { animation-delay: .5s; }
+.auth-arrive .auth-body > p { animation-delay: .56s; }
+.auth-arrive .auth-body > form { animation: none; }
+@keyframes auth-rise { from { opacity: 0; translate: 0 14px; filter: blur(4px); } }
+
+/* 전환을 못 쓰는 브라우저: 나가는 카드 */
+.auth-leave-fwd .auth-card { animation: auth-out-l .42s cubic-bezier(.6, 0, .8, .3) both; }
+.auth-leave-back .auth-card { animation: auth-out-r .42s cubic-bezier(.6, 0, .8, .3) both; }
+.auth-enter-fwd .auth-card { animation: auth-in-r .8s cubic-bezier(.16, 1, .3, 1) both; }
+.auth-enter-back .auth-card { animation: auth-in-l .8s cubic-bezier(.16, 1, .3, 1) both; }
+@media (prefers-reduced-motion: reduce) { ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; } }
+/* 로그인 · 회원가입 카드 길이가 달라도 위 탭 줄은 같은 자리에 — 가운데 대신 위에서 일정 거리 */
+.is-out .container:has(.auth-card) { align-items: start; padding-top: clamp(16px, 7vh, 72px); }
