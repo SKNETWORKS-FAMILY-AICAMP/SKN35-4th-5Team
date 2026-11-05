@@ -21,7 +21,7 @@
 <aside class="rail" aria-label="메뉴">
   <a class="rail-brand" href="{% url 'core:home' %}">
     <img src="{% static 'brand/rabbit-avatar.webp' %}" alt="" width="36" height="36">
-    <span><b>Beaurette</b><small>AD REVIEW SYSTEM</small></span>
+    <span><b>Beaurette</b><small>광고 문구 검토</small></span>
   </a>
   <nav class="rail-nav" data-rail>
     <i class="rail-ind" aria-hidden="true"></i>
@@ -49,10 +49,10 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><span>이력</span></a>
   </nav>
   <div class="rail-foot">
-    <p class="rail-sys"><i></i>SYSTEM ONLINE</p>
+    <p class="rail-sys" data-health="{% url 'core:health' %}"><i></i><span>AI 서버 확인 중</span></p>
     <div class="rail-me">
       <span class="av">{{ user.username|first|upper }}</span>
-      <span class="who"><b>{{ user.username }}</b><small>워크스페이스 관리자</small></span>
+      <span class="who"><b>{{ user.username }}</b><small>내 계정</small></span>
       <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button type="submit" class="rail-out" aria-label="로그아웃" title="로그아웃"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></form>
     </div>
   </div>
@@ -65,8 +65,8 @@
     <p class="app-path mono">BEAURETTE <i>/</i> <b>{% block crumb %}{% if rm.app_name == 'products' %}내 제품{% elif rm.app_name == 'chat' %}챗봇{% elif rm.app_name == 'accounts' %}{% if rm.url_name == 'signup' %}회원가입{% else %}로그인{% endif %}{% elif rm.url_name == 'list' or rm.url_name == 'generation_list' %}이력{% elif rm.url_name == 'generate' or rm.url_name == 'generation_detail' %}광고문 생성{% elif rm.app_name == 'reviews' %}문구 검토{% elif rm.url_name == 'bulk' %}상세페이지 검토{% elif rm.url_name == 'library' %}규정 · 가이드라인{% elif rm.url_name == 'forecast' %}예상 매출 시나리오{% else %}대시보드{% endif %}{% endblock %}</b></p>
     <p class="app-sys mono"><i></i><span data-clock></span></p>
     {% if not user.is_authenticated %}
-      <a class="app-btn ghost" href="{% url 'accounts:login' %}">로그인</a>
-      <a class="app-btn" href="{% url 'accounts:signup' %}">회원가입</a>
+      <a class="app-btn ghost" href="{% url 'accounts:login' %}" data-auth-go="login">로그인</a>
+      <a class="app-btn" href="{% url 'accounts:signup' %}" data-auth-go="signup">회원가입</a>
     {% endif %}
   </header>
   <main class="container">

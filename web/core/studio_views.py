@@ -124,7 +124,7 @@ class ForecastForm(ProductChoiceMixin, forms.Form):
     offense = forms.ChoiceField(label="위반 차수", choices=[(1, "1차"), (2, "2차"), (3, "3차"), (4, "4차 이상")], initial=1)
     sanction_kind = forms.ChoiceField(label="위반 대상", choices=[("광고", "광고 (광고업무정지)"), ("표시", "표시 (판매업무정지)")])
     ad_share = forms.IntegerField(label="광고에서 나오는 매출 비중 (%)", min_value=0, max_value=100, required=False,
-                                  help_text="모르면 비워 두세요 — 상한만 보여 줍니다.")
+                                  help_text="모르면 비워 두세요. 최대 금액으로 보여 줍니다.")
 
     def clean(self):
         data = super().clean()

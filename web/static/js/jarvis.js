@@ -15,7 +15,6 @@
   function show(n, push = true) {
     n = Math.max(0, Math.min(slides.length - 1, n));
     if (n === i) return;
-    const back = n < i;
     i = n;
     slides.forEach((s, k) => {
       s.classList.toggle("is-on", k === n);
@@ -28,7 +27,7 @@
     cur.textContent = String(n + 1).padStart(2, "0");
     prev.disabled = n === 0; next.disabled = n === slides.length - 1;
     const s = slides[n];
-    if (read) read.innerHTML = `SECTION ${String(n + 1).padStart(2, "0")} // ${s.dataset.title}<br>STATUS · ${back ? "RECALL" : "LOADED"}`;
+    if (read) read.textContent = `${String(n + 1).padStart(2, "0")} / ${String(slides.length).padStart(2, "0")} · ${s.dataset.title}`;
     // 배경: 그 장의 원본 사진 (없으면 앞 장 사진을 어둡게 유지)
     if (s.dataset.bg) { bg.classList.remove("on"); requestAnimationFrame(() => { bg.style.backgroundImage = `url("${s.dataset.bg}")`; bg.classList.add("on", "is-clear"); }); }
     else bg.classList.remove("on");

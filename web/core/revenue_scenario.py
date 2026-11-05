@@ -28,8 +28,8 @@ REFERENCE = Path(__file__).resolve().parent / "reference"
 PENALTY_PATH = REFERENCE / "penalty_schedule.json"
 EFFECT_PATH = REFERENCE / "copy_effect_size_distribution.json"
 
-DISPLAY_LABEL = "가정 기반 시나리오 · 학습된 예측 아님"
-EFFECT_LABEL = "다른 분야 실험에서 관찰된 문구 효과 크기를 참고한 가정 범위 (방향 미정, ±)"
+DISPLAY_LABEL = "입력한 값으로 계산한 예상치"   # 화면 문구 (3차 원본: 가정 기반 시나리오 · 학습된 예측 아님)
+EFFECT_LABEL = "다른 광고 실험에서 문구를 바꿨을 때 나타난 변화 폭 (오를 수도, 내릴 수도 있음)"
 
 
 # ---------------------------------------------------------------------- 입력 정리
@@ -134,9 +134,9 @@ def revenue_at_risk(monthly_revenue: Range3, penalty: dict[str, Any], level: int
                     ad_dependent_share: float | None, sanction_kind: str = "광고") -> dict[str, Any]:
     heaviest = penalty.get("heaviest")
     if level == 0 or penalty["status"] == "no_violation":
-        return {"status": "no_violation", "label": "규칙상 처분 위험 표현 없음"}
+        return {"status": "no_violation", "label": "적발될 표현이 없어요"}
     if not heaviest:
-        return {"status": "needs_review", "label": "처분 기준 개별 검토 필요", "note": penalty.get("note"),
+        return {"status": "needs_review", "label": "처분 기준을 따로 확인해야 해요", "note": penalty.get("note"),
                 "unmapped_law_ids": penalty.get("unmapped_law_ids", [])}
 
     months = heaviest["months"]
@@ -157,7 +157,7 @@ def revenue_at_risk(monthly_revenue: Range3, penalty: dict[str, Any], level: int
     return {"status": "mapped", "condition": condition, "months": months,
             "sanction": heaviest["sanction"]["광고"], "basis_law_id": heaviest["law_id"],
             "upper_bound_krw": upper.as_dict(),
-            "upper_bound_meaning": "모든 판매가 광고에서 발생한다고 가정한 상한",
+            "upper_bound_meaning": "판매 전부가 광고로 나온다고 본 최대 금액",
             "estimate_krw": estimate.as_dict() if estimate else None,
             "estimate_note": None if estimate else "광고 의존 매출 비중을 입력하면 추정액을 계산합니다.",
             "unmapped_law_ids": penalty.get("unmapped_law_ids", []),
@@ -172,7 +172,7 @@ def copy_change_band(monthly_revenue: Range3, copy_exposed_share: float,
     exposed_mid = monthly_revenue.mid * copy_exposed_share
     bands = {name: round(exposed_mid * q[name]) for name in ("p25", "median", "p75")}
     return {
-        "applies_to": "문구가 노출되는 경로의 유입(클릭) 기반 매출만. 구매전환율·객단가는 고정",
+        "applies_to": "광고 문구를 보고 들어온 매출에만 적용 (구매율 · 객단가는 그대로)",
         "exposed_revenue_mid_krw": round(exposed_mid),
         "change_magnitude_pct": {k: round(q[k] * 100, 1) for k in ("p25", "median", "p75")},
         "change_magnitude_krw": bands,
@@ -183,7 +183,7 @@ def copy_change_band(monthly_revenue: Range3, copy_exposed_share: float,
         "direction": "unknown",
         "label": EFFECT_LABEL,
         "source": effect["source"]["file"],
-        "not_identified": "추천 문구별 상승률은 식별되지 않았습니다. 후보 A/B/C 에 같은 범위를 공통 적용합니다.",
+        "not_identified": "추천 문구마다 매출이 얼마나 오를지는 따로 알 수 없어, 모든 추천 문구에 같은 범위를 썼습니다.",
     }
 
 
@@ -200,8 +200,8 @@ def build_scenario(
     sanction_kind: str = "광고",
     ad_dependent_share: float | None = None,
     copy_exposed_share: float = 1.0,
-    units_source: str = "사용자 입력",
-    price_source: str = "사용자 입력",
+    units_source: str = "직접 입력",
+    price_source: str = "직접 입력",
     rule_engine: Any = None,
 ) -> dict[str, Any]:
     """예상 매출 시나리오.
@@ -232,8 +232,8 @@ def build_scenario(
     assumptions = [
         f"월 판매량: {units_source}",
         f"판매가: {price_source}",
-        f"문구 노출 경로 매출 비중 {exposed:.0%}" + (" (기본값: 전부라고 가정)" if copy_exposed_share == 1.0 else ""),
-        "구매전환율·객단가는 문구와 무관하게 고정",
+        f"광고 문구를 보고 들어온 매출 비중 {exposed:.0%}" + (" (따로 넣지 않아 전부로 계산)" if copy_exposed_share == 1.0 else ""),
+        "구매율 · 객단가는 문구와 상관없이 그대로 둠",
     ]
     if ad_share is not None:
         assumptions.append(f"광고 의존 매출 비중 {ad_share:.0%}")

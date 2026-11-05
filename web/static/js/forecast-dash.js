@@ -96,7 +96,7 @@
     // 변화 폭 띠 (일렁이는 금빛 + 테두리 점선이 흐른다)
     const band = mk("rect", { x: x(b.low), y: y - 18, width: Math.max(2, x(b.high) - x(b.low)), height: 36, rx: 8, fill: "url(#band-r)", stroke: C.gold, "stroke-dasharray": "4 4", "stroke-opacity": .6 }, svg);
     anim(band, { attributeName: "stroke-dashoffset", from: 0, to: -16, dur: "1.6s" });
-    band.addEventListener("pointermove", (e) => T.show(e.offsetX, e.offsetY - 12, `<b>문구 교체 시 변화 폭</b>±${D.band_pct}% · ${won(b.low)} ~ ${won(b.high)}<br><small>방향 미정 (오를 수도 내릴 수도)</small>`));
+    band.addEventListener("pointermove", (e) => T.show(e.offsetX, e.offsetY - 12, `<b>문구를 바꾸면 달라지는 폭</b>±${D.band_pct}% · ${won(b.low)} ~ ${won(b.high)}<br><small>오를 수도, 내릴 수도 있어요</small>`));
     band.addEventListener("pointerleave", T.hide);
     // 범위 선
     const line = mk("line", { x1: x(r.low), x2: x(r.low), y1: y, y2: y, stroke: C.gold, "stroke-width": 6, "stroke-linecap": "round" }, svg);
@@ -139,7 +139,7 @@
     axis(svg, x, max, 22, 128, W);
     const T = tip(plot);
     const rows = [
-      { name: "원문 그대로", v: risk, color: C.risk, y: 52, label: D.risk_status === "mapped" ? `${D.risk_is_estimate ? "" : "최대 "}${won(risk)}` : D.risk_status === "needs_review" ? "개별 검토 필요" : "위험 없음" },
+      { name: "지금 문구", v: risk, color: C.risk, y: 52, label: D.risk_status === "mapped" ? `${D.risk_is_estimate ? "" : "최대 "}${won(risk)}` : D.risk_status === "needs_review" ? "따로 검토 필요" : "위험 없음" },
       { name: "추천 문구", v: 0, color: C.safe, y: 112, label: D.has_best ? "0원 · 위험 없음" : "제안 없음" },
     ];
     const mx = x(D.revenue.mid);
@@ -166,7 +166,7 @@
     // 참고: 월 예상 매출(보통)
     const ref = mk("line", { x1: mx, x2: mx, y1: 24, y2: 150, stroke: C.gold, "stroke-width": 1.5, "stroke-dasharray": "3 4" }, svg);
     anim(ref, { attributeName: "stroke-dashoffset", from: 0, to: -14, dur: "1.2s" });
-    const rt = mk("text", { x: Math.max(80, Math.min(mx, W - 80)), y: 14, fill: C.muted, "font-size": 11, "text-anchor": "middle" }, svg); rt.textContent = `참고 · 월 매출 보통 ${won(D.revenue.mid)}`;
+    const rt = mk("text", { x: Math.max(80, Math.min(mx, W - 80)), y: 14, fill: C.muted, "font-size": 11, "text-anchor": "middle" }, svg); rt.textContent = `월 예상 매출 ${won(D.revenue.mid)}`;
   }
 
   const range = document.querySelector('[data-chart="range"]'), compare = document.querySelector('[data-chart="compare"]');

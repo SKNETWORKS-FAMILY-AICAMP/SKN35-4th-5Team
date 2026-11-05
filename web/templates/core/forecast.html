@@ -3,21 +3,21 @@
 {% block title %}예상 매출 시나리오{% endblock %}
 {% block content %}
 <div class="page-head"><h1>예상 매출 시나리오</h1><span class="badge">{{ label }}</span></div>
-<p class="lead">지금 문구를 그대로 쓰다 적발되면 매출이 얼마나 영향받는지, 검증을 통과한 제안 문구로 바꾸면 어떻게 되는지 입력한 가정으로 계산합니다.</p>
+<p class="lead">지금 문구를 그대로 쓰다 적발되면 매출이 얼마나 영향을 받는지, 추천 문구로 바꾸면 어떻게 되는지 판매가와 판매량을 넣어 계산해 봅니다.</p>
 {% if before %}
-{# ── 결과 대시보드: 큰 숫자 4개 → 차트 2개 → 문구 비교 → 가정 ── #}
-<section class="fc-dash" aria-label="시나리오 결과">
+{# ── 결과 대시보드: 큰 숫자 4개 → 차트 2개 → 문구 비교 → 계산 기준 ── #}
+<section class="fc-dash" aria-label="계산 결과">
   <div class="kpis">
     <article class="kpi">
-      <p class="kpi-k">월 예상 매출 · 보통</p>
+      <p class="kpi-k">월 예상 매출</p>
       <p class="kpi-v" data-count="{{ before.monthly_revenue_krw.mid }}">{{ before.monthly_revenue_krw.mid|won }}</p>
-      <p class="kpi-s">적게 {{ before.monthly_revenue_krw.low|won }} ~ 많이 {{ before.monthly_revenue_krw.high|won }}</p>
+      <p class="kpi-s">적게 팔릴 때 {{ before.monthly_revenue_krw.low|won }} · 많이 팔릴 때 {{ before.monthly_revenue_krw.high|won }}</p>
     </article>
     <article class="kpi is-risk">
-      <p class="kpi-k"><span class="st st-risk" aria-hidden="true">!</span>원문 유지 시 위험 매출</p>
+      <p class="kpi-k"><span class="st st-risk" aria-hidden="true">!</span>지금 문구로 적발되면</p>
       {% if risk.status == "mapped" %}
         <p class="kpi-v" data-count="{{ risk_amount }}">{% if not fc_data.risk_is_estimate %}<small>최대</small> {% endif %}{{ risk_amount|won }}</p>
-        <p class="kpi-s">{{ risk.condition }} · {% if fc_data.risk_is_estimate %}광고 의존 비중 반영 추정{% else %}모든 판매가 광고에서 나온다고 본 상한{% endif %}</p>
+        <p class="kpi-s">{% if fc_data.risk_is_estimate %}광고로 팔리는 비중을 반영한 금액{% else %}판매 전부가 광고로 나온다고 본 최대 금액{% endif %}</p>
       {% elif risk.status == "needs_review" %}
         <p class="kpi-v sm">개별 검토</p><p class="kpi-s">{{ risk.note }}</p>
       {% else %}
@@ -26,43 +26,43 @@
     </article>
     <article class="kpi kpi-gauge">
       <div>
-        <p class="kpi-k">업무정지 기간</p>
+        <p class="kpi-k">정지 기간</p>
         {% if risk.months %}
           <p class="kpi-v"><span data-count="{{ risk.months }}" data-unit="개월">{{ risk.months }}개월</span></p>
-          <p class="kpi-s">{{ risk.sanction }}<br>게이지 · 12개월 기준</p>
+          <p class="kpi-s">{{ risk.sanction }} · 1년 중 {{ risk.months }}개월</p>
         {% else %}<p class="kpi-v sm">해당 없음</p>{% endif %}
       </div>
       <span class="gauge-wrap" aria-hidden="true"><svg class="gauge" viewBox="0 0 100 100" data-gauge="{{ risk.months|default:0 }}"><circle class="g-track" cx="50" cy="50" r="40"/><circle class="g-val" cx="50" cy="50" r="40"/></svg></span>
     </article>
     <article class="kpi">
-      <p class="kpi-k">문구 교체 시 변화 폭</p>
+      <p class="kpi-k">문구를 바꾸면 달라지는 폭</p>
       <p class="kpi-v">±<span data-count="{{ band.change_magnitude_pct.p75 }}" data-unit="%" data-dec="1">{{ band.change_magnitude_pct.p75 }}%</span></p>
-      <p class="kpi-s">월 {{ band.typical_range_krw.low|won }} ~ {{ band.typical_range_krw.high|won }} · 방향 미정</p>
+      <p class="kpi-s">월 {{ band.typical_range_krw.low|won }} ~ {{ band.typical_range_krw.high|won }} 사이에서 오르거나 내릴 수 있어요</p>
     </article>
   </div>
 
   <div class="fc-charts">
     <section class="card chart">
-      <h2>월 매출 범위 <small>판매량 가정 · 적게 / 보통 / 많이</small></h2>
+      <h2>월 매출 범위 <small>판매량을 적게 · 보통 · 많이로 넣었을 때</small></h2>
       <div class="chart-plot" data-chart="range" role="img" aria-label="월 매출 적게 {{ before.monthly_revenue_krw.low|won }}, 보통 {{ before.monthly_revenue_krw.mid|won }}, 많이 {{ before.monthly_revenue_krw.high|won }}"></div>
-      <p class="legend"><span class="lg-dot"></span>월 매출 <span class="lg-band"></span>문구 교체 시 변화 폭 (±{{ band.change_magnitude_pct.p75 }}%)</p>
+      <p class="legend"><span class="lg-dot"></span>월 매출 <span class="lg-band"></span>문구를 바꾸면 달라지는 폭 (±{{ band.change_magnitude_pct.p75 }}%)</p>
     </section>
     <section class="card chart">
-      <h2>원문 vs 추천 문구 <small>처분 시 영향받는 매출</small></h2>
+      <h2>지금 문구 vs 추천 문구 <small>적발되면 영향받는 매출</small></h2>
       <div class="chart-plot" data-chart="compare" role="img" aria-label="원문 위험 매출 {{ risk_amount|won }}, 추천 문구 위험 없음"></div>
-      <p class="legend"><span class="lg-sq risk"></span>원문 그대로 <span class="lg-sq safe"></span>추천 문구 <span class="lg-out"></span>월 예상 매출 (보통, 참고)</p>
+      <p class="legend"><span class="lg-sq risk"></span>지금 문구 <span class="lg-sq safe"></span>추천 문구 <span class="lg-out"></span>월 예상 매출</p>
     </section>
   </div>
 
   <div class="fc-grid">
     <section class="card fc">
-      <p class="fc-k">원문 그대로</p>
+      <p class="fc-k">지금 문구</p>
       <blockquote>{{ copy_text }}</blockquote>
       <p>{% include "partials/verdict.html" with level=level label=verdict_label %}{% for l in law_ids %} <span class="law">{{ l }}</span>{% endfor %}</p>
     </section>
     <section class="card fc">
       <p class="fc-k">추천 문구로 바꾸면</p>
-      {% if best %}<blockquote>{{ best }}</blockquote><p><span class="badge badge-0">역검증 통과</span> <span class="law">처분 위험 없음</span></p>
+      {% if best %}<blockquote>{{ best }}</blockquote><p><span class="badge badge-0">다시 검토해도 통과</span> <span class="law">적발 위험 없음</span></p>
       {% else %}<p>근거가 부족해 제안 문구가 없습니다. 담당자 검토가 필요합니다.</p>{% endif %}
     </section>
   </div>
@@ -73,28 +73,28 @@
       <thead><tr><th>항목</th><th>적게</th><th>보통</th><th>많이</th></tr></thead>
       <tbody>
         <tr><td>월 매출</td><td>{{ before.monthly_revenue_krw.low|won }}</td><td>{{ before.monthly_revenue_krw.mid|won }}</td><td>{{ before.monthly_revenue_krw.high|won }}</td></tr>
-        {% if risk.upper_bound_krw %}<tr><td>원문 유지 시 위험 매출 (상한)</td><td>{{ risk.upper_bound_krw.low|won }}</td><td>{{ risk.upper_bound_krw.mid|won }}</td><td>{{ risk.upper_bound_krw.high|won }}</td></tr>{% endif %}
-        {% if risk.estimate_krw %}<tr><td>원문 유지 시 위험 매출 (추정)</td><td>{{ risk.estimate_krw.low|won }}</td><td>{{ risk.estimate_krw.mid|won }}</td><td>{{ risk.estimate_krw.high|won }}</td></tr>{% endif %}
-        <tr><td>추천 문구 위험 매출</td><td>0원</td><td>0원</td><td>0원</td></tr>
+        {% if risk.upper_bound_krw %}<tr><td>적발되면 영향받는 매출 (최대)</td><td>{{ risk.upper_bound_krw.low|won }}</td><td>{{ risk.upper_bound_krw.mid|won }}</td><td>{{ risk.upper_bound_krw.high|won }}</td></tr>{% endif %}
+        {% if risk.estimate_krw %}<tr><td>적발되면 영향받는 매출 (광고 비중 반영)</td><td>{{ risk.estimate_krw.low|won }}</td><td>{{ risk.estimate_krw.mid|won }}</td><td>{{ risk.estimate_krw.high|won }}</td></tr>{% endif %}
+        <tr><td>추천 문구로 바꾸면</td><td>0원</td><td>0원</td><td>0원</td></tr>
       </tbody>
     </table>
   </details>
 
   <section class="card">
-    <h2>계산 가정</h2>
+    <h2>이렇게 계산했어요</h2>
     <ul class="assume">{% for a in before.assumptions %}<li>{{ a }}</li>{% endfor %}</ul>
-    <p><small>제공하지 않는 값: {{ before.not_provided|join:" · " }}. {{ band.not_identified }}</small></p>
+    <p><small>{{ band.not_identified }} 적발될 확률이나 처분 감경·가중은 계산에 넣지 않았습니다.</small></p>
   </section>
 </section>
 {{ fc_data|json_script:"fc-data" }}
 {% endif %}
 
 <details class="card fc-inputs" {% if not before %}open{% endif %}>
-  <summary>{% if before %}가정 바꿔서 다시 계산하기{% else %}가정 입력{% endif %}</summary>
-  <form method="post" class="fc-form" data-loading="문구를 검토하고 시나리오를 계산하는 중입니다… (최대 1분)">
+  <summary>{% if before %}값 바꿔서 다시 계산하기{% else %}판매가 · 판매량 입력{% endif %}</summary>
+  <form method="post" class="fc-form" data-loading="문구를 검토하고 매출을 계산하는 중입니다… (최대 1분)">
     {% csrf_token %}
     {% include "partials/form_fields.html" %}
-    <button type="submit" class="btn">시나리오 계산하기</button>
+    <button type="submit" class="btn">계산하기</button>
   </form>
 </details>
 {% endblock %}
